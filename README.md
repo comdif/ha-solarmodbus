@@ -1,6 +1,6 @@
-# ha-solarman-localmodbus
+# ha-solarmodbus
 
-**Local Modbus integration for Solarman‑compatible hybrid inverters (Deye, Sunsynk, LuxPower, Sofar…).  
+**Local Modbus integration for Solarman‑compatible inverters (Deye, Sunsynk, LuxPower, Sofar…).  
 100% local · Multi‑brand · Extensible · No cloud required**
 
 ---
@@ -51,7 +51,7 @@ Both methods are fully supported.
 
 ## 📌 Overview
 
-**ha‑solarman‑localmodbus** is a fully local Home Assistant integration designed to read, decode, and expose Modbus TCP data from hybrid inverters compatible with the *Solarman* ecosystem.
+**solarmodbus** is a fully local Home Assistant integration designed to read, decode, and expose Modbus TCP data from hybrid inverters compatible with the *Solarman* ecosystem.
 
 Unlike cloud‑based Solarman solutions, this integration communicates **directly with the inverter over Modbus TCP**, providing:
 
