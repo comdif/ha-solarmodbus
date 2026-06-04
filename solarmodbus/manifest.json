@@ -1,0 +1,12 @@
+{
+  "domain": "solarmodbus",
+  "name": "Solarmodbus",
+  "version": "0.1.0",
+  "documentation": "https://github.com/comdif/ha-solarmodbus",
+  "requirements": ["pymodbus>=3.6.0"],
+  "codeowners": ["@ChristianZeler"],
+  "config_flow": true,
+  "iot_class": "local_polling",
+  "after_dependencies": ["modbus"],
+  "loggers": ["pymodbus"]
+}
