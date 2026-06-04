@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import socket
 import voluptuous as vol
+import os
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
@@ -15,6 +16,7 @@ from .const import (
     DEFAULT_SLAVE_ID,
     DEFAULT_SERIAL_PORT,
     SUPPORTED_MODES,
+    DEFINITIONS_PATH,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,10 +24,11 @@ _LOGGER = logging.getLogger(__name__)
 CONF_MODE = "mode"
 CONF_SLAVE_ID = "slave_id"
 CONF_SERIAL_PORT = "serial_port"
+CONF_MODEL = "model"
+CONF_HELP = "help_text"
 
 
 def _test_tcp_connection(host: str, port: int, timeout: float = 2.0) -> bool:
-    """Simple TCP connection test."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
@@ -36,13 +39,24 @@ def _test_tcp_connection(host: str, port: int, timeout: float = 2.0) -> bool:
         return False
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Solarmodbus integration."""
+def _list_yaml_models(hass) -> dict:
+    models = {}
+    try:
+        base = hass.config.path(DEFINITIONS_PATH)
+        for file in os.listdir(base):
+            if file.endswith(".yaml"):
+                name = file.replace(".yaml", "")
+                models[file] = name
+    except Exception as e:
+        _LOGGER.error("Unable to list inverter models: %s", e)
 
+    return models
+
+
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(self, user_input=None):
-        """First step: choose connection mode."""
         errors = {}
 
         if user_input is not None:
@@ -67,8 +81,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_modbus(self, user_input=None):
-        """Configure Modbus TCP."""
         errors = {}
+        models = _list_yaml_models(self.hass)
 
         if user_input is not None:
             host = user_input[CONF_HOST]
@@ -91,6 +105,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
             vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
             vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
+            vol.Required(CONF_MODEL): vol.In(models),
         })
 
         return self.async_show_form(
@@ -100,10 +115,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_serial(self, user_input=None):
-        """Configure Modbus RTU over USB/RS485."""
         errors = {}
+        models = _list_yaml_models(self.hass)
+
+        help_text = (
+            "Serial device path. Common values: /dev/ttyUSB0, /dev/ttyUSB1, /dev/ttyACM0. "
+            "Must be verified on the system."
+        )
 
         if user_input is not None:
+            user_input.pop(CONF_HELP, None)
             user_input[CONF_MODE] = "serial"
             return self.async_create_entry(
                 title=f"Solarmodbus Serial ({user_input[CONF_SERIAL_PORT]})",
@@ -111,8 +132,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         schema = vol.Schema({
+            vol.Optional(CONF_HELP, default=help_text): vol.In([help_text]),
             vol.Required(CONF_SERIAL_PORT, default=DEFAULT_SERIAL_PORT): str,
             vol.Required(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
+            vol.Required(CONF_MODEL): vol.In(models),
         })
 
         return self.async_show_form(
