@@ -92,5 +92,4 @@ The integration uses a flexible architecture based on YAML files describing the 
 
 ---
 
-## 📁 Repository Structure
-
+[📄 Solarmodbus Documentation (PDF)](./solarmodbus.pdf)
