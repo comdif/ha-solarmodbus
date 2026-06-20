@@ -93,3 +93,13 @@ The integration uses a flexible architecture based on YAML files describing the 
 ---
 
 [📄 Solarmodbus Documentation (PDF)](./solarmodbus.pdf)
+
+-    How to install on HAOS:
+
+Just past this one-line on you ssh console:
+
+`unzip -o <(curl -fsSL https://github.com/comdif/ha-solarmodbus/archive/refs/heads/main.zip) -d /tmp && cp -r /tmp/ha-solarmodbus-main/solarmodbus /config/custom_components/ && ha core restart`
+
+-    How to install on other OS:
+
+Just copy the solarmodbus directory in your HA custom-component directory.
