@@ -103,3 +103,7 @@ Just past this one-line on you ssh console:
 -    How to install on other OS:
 
 Just copy the solarmodbus directory in your HA custom-component directory.
+
+-    How to install on ANY OS with an universal installer:
+
+`bash <(curl -fsSL https://raw.githubusercontent.com/comdif/ha-solarmodbus/refs/heads/main/uinstall.sh) https://github.com/comdif/ha-solarmodbus/archive/refs/heads/main.zip`
