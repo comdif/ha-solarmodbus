@@ -1,0 +1,278 @@
+inverter:
+  model: "Deye SG05LP1-EU-AM2-P série"
+  description: "Modbus map field-validated on SG05LP1-EU-AM2-P"
+  modbus:
+    registers:
+
+      # ============================================================
+      # SYSTEM WORK MODE 1
+      # ============================================================
+
+      - name: "System Work Mode"
+        register: 244
+        type: enum
+        range: [0, 2]
+        values:
+          0: "Sell to grid"
+          1: "Zero export load"
+          2: "Zero export CT"
+
+      - name: "Solar Sell"
+        register: 247
+        type: enum
+        range: [0, 1]
+        values:
+          0: "Disable"
+          1: "Enable"
+
+      - name: "Day Mask"
+        register: 248
+        type: bitmask
+        range: [1, 255]
+        notes: "NONE = 1; ALL DAYS = 255; each day adds its bit + NONE"
+
+      - name: "Max Sell Power"
+        register: 245
+        type: uint16
+        unit: W
+        range: [500, 10000]
+
+      - name: "Max Solar Power"
+        register: 53
+        type: uint16
+        unit: W
+        range: [500, 12000]
+
+      - name: "Zero Export Power"
+        register: 206
+        type: uint16
+        unit: W
+        range: [0, 500]
+
+      # ============================================================
+      # SYSTEM WORK MODE 2 – TIME OF USE (TOU)
+      # ============================================================
+
+      - name: "TOU Enable"
+        register: 248
+        type: enum
+        range: [0, 1]
+        values:
+          0: "OFF"
+          1: "ON"
+
+      # -------------------------
+      # TIME 1
+      # -------------------------
+
+      - name: "TOU Start Time 1"
+        register: 250
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 1"
+        register: 251
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 1"
+        register: 256
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 1"
+        register: 268
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 1"
+        register: 274
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
+
+      # -------------------------
+      # TIME 2
+      # -------------------------
+
+      - name: "TOU Start Time 2"
+        register: 251
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 2"
+        register: 252
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 2"
+        register: 257
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 2"
+        register: 269
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 2"
+        register: 275
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
+
+      # -------------------------
+      # TIME 3
+      # -------------------------
+
+      - name: "TOU Start Time 3"
+        register: 252
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 3"
+        register: 253
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 3"
+        register: 258
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 3"
+        register: 270
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 3"
+        register: 276
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
+
+      # -------------------------
+      # TIME 4
+      # -------------------------
+
+      - name: "TOU Start Time 4"
+        register: 253
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 4"
+        register: 254
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 4"
+        register: 259
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 4"
+        register: 271
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 4"
+        register: 277
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
+
+      # -------------------------
+      # TIME 5
+      # -------------------------
+
+      - name: "TOU Start Time 5"
+        register: 254
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 5"
+        register: 255
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 5"
+        register: 260
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 5"
+        register: 272
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 5"
+        register: 278
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
+
+      # -------------------------
+      # TIME 6
+      # -------------------------
+
+      - name: "TOU Start Time 6"
+        register: 255
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU End Time 6"
+        register: 250
+        type: hhmm
+        range: [0, 2359]
+
+      - name: "TOU Power 6"
+        register: 261
+        type: uint16
+        unit: W
+        range: [0, 5500]
+
+      - name: "TOU Battery 6"
+        register: 273
+        type: uint16
+        unit: "%"
+        range: [0, 100]
+
+      - name: "TOU Grid/Gen 6"
+        register: 279
+        type: enum
+        range: [4, 7]
+        values:
+          4: "none"
+          5: "grid only"
+          6: "gen only"
+          7: "gen+grid"
