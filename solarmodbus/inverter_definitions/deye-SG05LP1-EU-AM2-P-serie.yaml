@@ -1,278 +1,1042 @@
-inverter:
-  model: "Deye SG05LP1-EU-AM2-P série"
-  description: "Modbus map field-validated on SG05LP1-EU-AM2-P"
-  modbus:
-    registers:
+# ============================================================
+# MY PERSONAL DEYE INVERTER WORKING FILE FOR TEST
+# ============================================================
+requests:
+  - start: 0x0003
+    end: 0x0070
+    mb_functioncode: 0x03
+  - start: 0x0096
+    end: 0x00f9
+    mb_functioncode: 0x03
+  - start: 0x00FA
+    end: 0x0117
+    mb_functioncode: 0x03
 
-      # ============================================================
-      # SYSTEM WORK MODE 1
-      # ============================================================
+parameters:
+ - group: solar
+   items: 
+    - name: "PV1 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00BA]
+      icon: 'mdi:solar-power'
 
-      - name: "System Work Mode"
-        register: 244
-        type: enum
-        range: [0, 2]
-        values:
-          0: "Sell to grid"
-          1: "Zero export load"
-          2: "Zero export CT"
+    - name: "PV2 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00BB]
+      icon: 'mdi:solar-power'
 
-      - name: "Solar Sell"
-        register: 247
-        type: enum
-        range: [0, 1]
-        values:
-          0: "Disable"
-          1: "Enable"
+    - name: "PV1 Voltage"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x006D]
+      icon: 'mdi:solar-power'
 
-      - name: "Day Mask"
-        register: 248
-        type: bitmask
-        range: [1, 255]
-        notes: "NONE = 1; ALL DAYS = 255; each day adds its bit + NONE"
+    - name: "PV2 Voltage"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x006F]
+      icon: 'mdi:solar-power'
 
-      - name: "Max Sell Power"
-        register: 245
-        type: uint16
-        unit: W
-        range: [500, 10000]
+    - name: "PV1 Current"
+      class: "current"
+      uom: "A"
+      scale: 0.1
+      rule: 1
+      registers: [0x006E]
+      icon: 'mdi:solar-power'
 
-      - name: "Max Solar Power"
-        register: 53
-        type: uint16
-        unit: W
-        range: [500, 12000]
+    - name: "PV2 Current"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.1
+      rule: 1
+      registers: [0x0070]
+      icon: 'mdi:solar-power'
 
-      - name: "Zero Export Power"
-        register: 206
-        type: uint16
-        unit: W
-        range: [0, 500]
+    - name: "Daily Production"
+      class: "energy"
+      state_class: "measurement"
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x006C]
+      icon: 'mdi:solar-power'
 
-      # ============================================================
-      # SYSTEM WORK MODE 2 – TIME OF USE (TOU)
-      # ============================================================
+    - name: "Total Production"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x0060,0x0061]
+      icon: 'mdi:solar-power'
 
-      - name: "TOU Enable"
-        register: 248
-        type: enum
-        range: [0, 1]
-        values:
-          0: "OFF"
-          1: "ON"
+    - name: "Micro-inverter Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00A6]
+      icon: 'mdi:solar-power'
 
-      # -------------------------
-      # TIME 1
-      # -------------------------
+ - group: Battery
+   items: 
+    - name: "Total Battery Charge"
+      class: "energy"
+      state_class: "total_increasing"      
+      uom: "kWh"
+      scale: 0.1
+      rule: 3
+      registers: [0x0048,0x0049]
+      icon: 'mdi:battery-plus'
 
-      - name: "TOU Start Time 1"
-        register: 250
-        type: hhmm
-        range: [0, 2359]
+    - name: "Total Battery Discharge"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 3
+      registers: [0x004A,0x004B]
+      icon: 'mdi:battery-minus'
 
-      - name: "TOU End Time 1"
-        register: 251
-        type: hhmm
-        range: [0, 2359]
+    - name: "Daily Battery Charge"
+      class: "energy"
+      state_class: "total_increasing"      
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x0046]
+      icon: 'mdi:battery-plus'
+      
+    - name: "Daily Battery Discharge"
+      class: "energy"
+      state_class: "total_increasing"      
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x0047]
+      icon: 'mdi:battery-minus'
 
-      - name: "TOU Power 1"
-        register: 256
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "Battery Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00BE]
+      icon: 'mdi:battery'
 
-      - name: "TOU Battery 1"
-        register: 268
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "Battery Voltage"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.01
+      rule: 1
+      registers: [0x00B7]
+      icon: 'mdi:battery'
 
-      - name: "TOU Grid/Gen 1"
-        register: 274
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
+    - name: "Battery SOC"
+      class: "battery"
+      state_class: "measurement"
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x00B8]
+      icon: 'mdi:battery'
 
-      # -------------------------
-      # TIME 2
-      # -------------------------
+    - name: "Battery Current"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.01
+      rule: 2
+      registers: [0x00BF]
+      icon: 'mdi:battery'
 
-      - name: "TOU Start Time 2"
-        register: 251
-        type: hhmm
-        range: [0, 2359]
+    - name: "Battery Temperature"
+      class: "temperature"
+      state_class: "measurement"
+      uom: "Â°C"
+      scale: 0.1
+      rule: 1
+      offset: 1000      
+      registers: [0x00B6]
+      icon: 'mdi:battery'
 
-      - name: "TOU End Time 2"
-        register: 252
-        type: hhmm
-        range: [0, 2359]
+ - group: Grid
+   items: 
+    - name: "Total Grid Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00A9]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU Power 2"
-        register: 257
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "Grid Voltage L1"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x0096]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU Battery 2"
-        register: 269
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "Grid Current L1"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.01
+      rule: 1
+      registers: [0x00A0]
+      icon: 'mdi:current-ac'
+    - name: "Grid Voltage L2"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x0097]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU Grid/Gen 2"
-        register: 275
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
+    - name: "Grid Current L2"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.01
+      rule: 1
+      registers: [0x00A1]
+      icon: 'mdi:current-ac'
+      
+    - name: "Internal CT L1 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00A7]
+      icon: 'mdi:transmission-tower'
 
-      # -------------------------
-      # TIME 3
-      # -------------------------
+    - name: "Internal CT L2 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00A8]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU Start Time 3"
-        register: 252
-        type: hhmm
-        range: [0, 2359]
+    - name: "External CT L1 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00AA]
+      icon: 'mdi:transmission-tower'
+      
+    - name: "External CT L2 Power"
+      class: "power"
+      state_class: "measurement"
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00AB]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU End Time 3"
-        register: 253
-        type: hhmm
-        range: [0, 2359]
+    - name: "Daily Energy Bought"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x004C]
+      icon: 'mdi:transmission-tower-export'
 
-      - name: "TOU Power 3"
-        register: 258
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "Total Energy Bought"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x004E,0x0050]
+      icon: 'mdi:transmission-tower-export'
+      
+    - name: "Daily Energy Sold"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x004D]
+      icon: 'mdi:transmission-tower-import'
 
-      - name: "TOU Battery 3"
-        register: 270
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "Total Energy Sold"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 3
+      registers: [0x0051,0x0052]
+      icon: 'mdi:transmission-tower-import'
 
-      - name: "TOU Grid/Gen 3"
-        register: 276
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
 
-      # -------------------------
-      # TIME 4
-      # -------------------------
+    - name: "Total Grid Production"
+      class: "energy"
+      state_class: "total_increasing"
+      uom: "kWh"
+      scale: 0.1
+      rule: 4
+      registers: [0x003F,0x0040]
+      icon: 'mdi:transmission-tower'
 
-      - name: "TOU Start Time 4"
-        register: 253
-        type: hhmm
-        range: [0, 2359]
+ - group: Upload
+   items: 
+    - name: "Total Load Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00B2]
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU End Time 4"
-        register: 254
-        type: hhmm
-        range: [0, 2359]
+    - name: "Load L1 Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00B0]
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU Power 4"
-        register: 259
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "Load L2 Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00B1]
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU Battery 4"
-        register: 271
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "Load Voltage"
+      class: "voltage"
+      state_class: "measurement"      
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x009D]
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU Grid/Gen 4"
-        register: 277
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
+    - name: "Daily Load Consumption"
+      class: "energy"
+      state_class: "total_increasing"      
+      uom: "kWh"
+      scale: 0.1
+      rule: 1
+      registers: [0x0054]
+      icon: 'mdi:lightning-bolt-outline'
 
-      # -------------------------
-      # TIME 5
-      # -------------------------
+    - name: "Total Load Consumption"
+      class: "energy"
+      state_class: "total_increasing"      
+      uom: "kWh"
+      scale: 0.1
+      rule: 3
+      registers: [0x0055,0x0056]
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU Start Time 5"
-        register: 254
-        type: hhmm
-        range: [0, 2359]
+    - name: "SmartLoad Enable Status"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00C3]
+      isstr: true
+      lookup: 
+      -  key: 0
+         value: "OFF"
+      -  key: 1
+         value: "ON"
+      icon: 'mdi:lightning-bolt-outline'
 
-      - name: "TOU End Time 5"
-        register: 255
-        type: hhmm
-        range: [0, 2359]
+ - group: Inverter
+   items: 
+    - name: "Running Status"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x003B]
+      isstr: true
+      lookup: 
+      -  key: 0
+         value: "Stand-by"
+      -  key: 1
+         value: "Self-checking"
+      -  key: 2
+         value: "Normal"
+      -  key: 3
+         value: "FAULT"
+      icon: 'mdi:home-lightning-bolt'
 
-      - name: "TOU Power 5"
-        register: 260
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "Total Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00AF]
+      icon: 'mdi:home-lightning-bolt'
 
-      - name: "TOU Battery 5"
-        register: 272
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "Grid Frequency"
+      class: "frequency"
+      state_class: "measurement"
+      uom: "Hz"
+      scale: 0.01
+      rule: 1
+      registers: [0x004F]
+      icon: 'mdi:sine-wave'
 
-      - name: "TOU Grid/Gen 5"
-        register: 278
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
+    - name: "Current L1"
+      class: "current"
+      state_class: "measurement"      
+      uom: "A"
+      scale: 0.01
+      rule: 2
+      registers: [0x00A4]
+      icon: 'mdi:home-lightning-bolt'
 
-      # -------------------------
-      # TIME 6
-      # -------------------------
+    - name: "Current L2"
+      class: "current"
+      uom: "A"
+      scale: 0.01
+      rule: 2
+      registers: [0x00A5]
+      icon: 'mdi:home-lightning-bolt'
 
-      - name: "TOU Start Time 6"
-        register: 255
-        type: hhmm
-        range: [0, 2359]
+    - name: "Inverter L1 Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00AD]
+      icon: 'mdi:home-lightning-bolt'
 
-      - name: "TOU End Time 6"
-        register: 250
-        type: hhmm
-        range: [0, 2359]
+    - name: "Inverter L2 Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 2
+      registers: [0x00AE]
+      icon: 'mdi:home-lightning-bolt'
+      
+    - name: "Load Frequency"
+      class: ""
+      state_class: "measurement"      
+      uom: "Hz"
+      scale: 0.01
+      rule: 1
+      registers: [0x00C0]
+      icon: 'mdi:sine-wave'
 
-      - name: "TOU Power 6"
-        register: 261
-        type: uint16
-        unit: W
-        range: [0, 5500]
+    - name: "DC Temperature"
+      class: "temperature"
+      state_class: "measurement"      
+      uom: "Â°C"
+      scale: 0.1
+      rule: 2
+      offset: 1000      
+      registers: [0x005A]
+      icon: 'mdi:thermometer'
 
-      - name: "TOU Battery 6"
-        register: 273
-        type: uint16
-        unit: "%"
-        range: [0, 100]
+    - name: "AC Temperature"
+      class: "temperature"
+      state_class: "measurement"      
+      uom: "Â°C"
+      scale: 0.1
+      rule: 2
+      offset: 1000      
+      registers: [0x005B]
+      icon: 'mdi:thermometer'
 
-      - name: "TOU Grid/Gen 6"
-        register: 279
-        type: enum
-        range: [4, 7]
-        values:
-          4: "none"
-          5: "grid only"
-          6: "gen only"
-          7: "gen+grid"
+    - name: "Inverter ID"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 5
+      registers: [0x0003,0x0004,0x0005,0x0006,0x0007]
+      isstr: true
+      
+    - name: "Communication Board Version No."
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x000E]
+      isstr: true
+
+    - name: "Control Board Version No."
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x000D]
+      isstr: true
+
+    - name: "Grid-connected Status"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00C2]
+      isstr: true
+      lookup: 
+      -  key: 0
+         value: "Off-Grid"
+      -  key: 1
+         value: "On-Grid"
+
+    - name: "Gen-connected Status"
+      class: ""
+      uom: ""
+      state_class: ""      
+      scale: 1
+      rule: 1
+      registers: [0x00A6]
+      isstr: true
+      lookup: 
+      -  key: 0
+         value: "none"
+      -  key: 1
+         value: "On"
+
+    - name: "Gen Power"
+      class: "power"
+      state_class: "measurement"      
+      uom: "W"
+      scale: 1
+      rule: 1
+      registers: [0x00A6]
+
+ - group: Alert
+   items: 
+    - name: "Alert"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 6
+      registers: [0x0065,0x0066,0x0067,0x0068,0x0069,0x006A]
+
+
+    # ============================================================
+    # SYSTEM WORK MODE 1
+    # ============================================================
+
+    - name: "System Work Mode"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F4]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Sell to grid"
+      -  key: 1
+         value: "Zero export load"
+      -  key: 2
+         value: "Zero export CT"
+      icon: "mdi:home-lightning-bolt"
+
+    - name: "Solar Sell"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F7]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: "mdi:solar-power"
+
+    - name: "Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F6]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Load Priority Mode"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F7]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Battery first"
+      -  key: 1
+         value: "Load first"
+      -  key: 2
+         value: "Grid first"
+      icon: "mdi:home-lightning-bolt"
+
+    # ============================================================
+    # SYSTEM WORK MODE 2 Time Of Use
+    # ============================================================
+ - group: Time of Use
+   items:
+
+    - name: "Time of Use"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F8]
+      isstr: true
+      lookup: 
+      -  key: 254
+         value: "OFF"
+      -  key: 255
+         value: "ON"
+
+    - name: "Time of Use 1 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0112]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 1 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0112]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 2 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0113]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 2 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0113]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 3 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0114]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 3 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0114]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 4 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0115]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 4 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0115]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 5 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0116]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 5 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0116]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 6 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0117]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 6 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0117]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use Time 1"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FA]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+    - name: "Time of Use Time 2"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FB]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+    - name: "Time of Use Time 3"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FC]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+    - name: "Time of Use Time 4"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FD]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+    - name: "Time of Use Time 5"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FE]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+    - name: "Time of Use Time 6"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00FF]
+      isstr: true
+      icon: 'mdi:timelapse'
+
+
+    - name: "Time of Use Power 1"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0100]
+      icon: "mdi:lightning-bolt-outline"
+
+    - name: "Time of Use Power 2"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0101]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Time of Use Power 3"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0102]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Time of Use Power 4"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0103]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Time of Use Power 5"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0104]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Time of Use Power 6"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0105]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Time of Use SOC 1"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x010C]
+      icon: 'mdi:battery'
+
+    - name: "Time of Use SOC 2"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x010D]
+      icon: 'mdi:battery'
+
+    - name: "Time of Use SOC 3"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x010E]
+      icon: 'mdi:battery'
+
+    - name: "Time of Use SOC 4"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x010F]
+      icon: 'mdi:battery'
+
+    - name: "Time of Use SOC 5"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0110]
+      icon: 'mdi:battery'
+
+    - name: "Time of Use SOC 6"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0111]
+      icon: 'mdi:battery'
+      
