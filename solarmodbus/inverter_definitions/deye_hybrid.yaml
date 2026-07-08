@@ -169,7 +169,7 @@ parameters:
     - name: "Battery Temperature"
       class: "temperature"
       state_class: "measurement"
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 1
       offset: 1000      
@@ -461,7 +461,7 @@ parameters:
     - name: "DC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 2
       offset: 1000      
@@ -471,7 +471,7 @@ parameters:
     - name: "AC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 2
       offset: 1000      
@@ -541,27 +541,6 @@ parameters:
       rule: 1
       registers: [0x00A6]
 
-    - name: "Work Mode"
-      class: ""
-      state_class: ""      
-      uom: ""
-      scale: 1
-      rule: 3
-      registers: [0x00F4,0x00F7]
-      isstr: true
-      lookup: 
-      -  key: 0
-         value: "Selling First"
-      -  key: 1
-         value: "Zero-Export to Load&Solar Sell"
-      -  key: 2
-         value: "Zero-Export to Home&Solar Sell"
-      -  key: 3
-         value: "Zero-Export to Load"
-      -  key: 4
-         value: "Zero-Export to Home"
-      icon: 'mdi:home-lightning-bolt'
-
  - group: Alert
    items: 
     - name: "Alert"
@@ -572,33 +551,351 @@ parameters:
       rule: 6
       registers: [0x0065,0x0066,0x0067,0x0068,0x0069,0x006A]
 
+
+    # ============================================================
+    # SYSTEM WORK MODE 1
+    # ============================================================
+
+    - name: "System Work Mode"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F4]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Sell to grid"
+      -  key: 1
+         value: "Zero export load"
+      -  key: 2
+         value: "Zero export CT"
+      icon: "mdi:home-lightning-bolt"
+
+    - name: "Solar Sell"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F7]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: "mdi:solar-power"
+
+    - name: "Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F6]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Load Priority Mode"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F7]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Battery first"
+      -  key: 1
+         value: "Load first"
+      -  key: 2
+         value: "Grid first"
+      icon: "mdi:home-lightning-bolt"
+
+    # ============================================================
+    # SYSTEM WORK MODE 2 Time Of Use
+    # ============================================================
  - group: Time of Use
    items:
-    - name: "Time of use Time 1"
+
+    - name: "Time of Use"
+      class: ""
+      state_class: ""      
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F8]
+      isstr: true
+      lookup: 
+      -  key: 254
+         value: "OFF"
+      -  key: 255
+         value: "ON"
+
+    - name: "Time of Use 1 Grid Charge"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
+      registers: [0x0112]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 1 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0112]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 2 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0113]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 2 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0113]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 3 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0114]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 3 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0114]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 4 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0115]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 4 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0115]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 5 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0116]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 5 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0116]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use 6 Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0117]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Enable"
+      -  key: 6
+         value: "Disable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
+    - name: "Time of Use 6 Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0117]
+      isstr: true
+      lookup:
+      -  key: 4
+         value: "Disable"
+      -  key: 5
+         value: "Disable"
+      -  key: 6
+         value: "Enable"
+      -  key: 7
+         value: "Enable"
+      icon: "mdi:generator-portable"
+
+    - name: "Time of Use Time 1"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
       registers: [0x00FA]
+      isstr: true
       icon: 'mdi:timelapse'
 
-    - name: "Time of use Time 2"
+    - name: "Time of Use Time 2"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x00FB]
-      icon: "mdi:timelapse"
-      
+      isstr: true
+      icon: 'mdi:timelapse'
+
     - name: "Time of Use Time 3"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x00FC]
+      isstr: true
       icon: 'mdi:timelapse'
 
     - name: "Time of Use Time 4"
@@ -606,8 +903,9 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x00FD]
+      isstr: true
       icon: 'mdi:timelapse'
 
     - name: "Time of Use Time 5"
@@ -615,18 +913,21 @@ parameters:
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x00FE]
-      icon: "mdi:timelapse"
+      isstr: true
+      icon: 'mdi:timelapse'
 
     - name: "Time of Use Time 6"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
-      rule: 9
+      rule: 1
       registers: [0x00FF]
+      isstr: true
       icon: 'mdi:timelapse'
+
 
     - name: "Time of Use Power 1"
       class: ""
@@ -736,78 +1037,3 @@ parameters:
       registers: [0x0111]
       icon: 'mdi:battery'
 
-    - name: "Time of Use Enable 1"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0112]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of Use Enable 2"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0113]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of Use Enable 3"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0114]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of Use Enable 4"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0115]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of Use Enable 5"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0116]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of Use Enable 6"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x0117]
-      icon: 'mdi:checkbox-marked-outline'
-
-    - name: "Time of use"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      mask: 1
-      registers: [0x00F8]
-      icon: 'mdi:checkbox-marked-outline'
-      isstr: true
-      lookup:
-        - key: 0
-          value: "Disable"
-        - key: 1
-          value: "Enable"
