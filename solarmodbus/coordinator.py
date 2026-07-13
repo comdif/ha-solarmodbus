@@ -16,8 +16,6 @@ SCAN_INTERVAL = timedelta(seconds=2)
 
 
 class SolarmodbusCoordinator(DataUpdateCoordinator):
-    """Coordinator handling Modbus TCP or RTU polling."""
-
     def __init__(
         self,
         hass: HomeAssistant,
@@ -45,6 +43,36 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
         self.parser = ModbusValueParser(definition)
         self.requests = self._extract_register_blocks(definition)
 
+        if self.mode == "modbus":
+            self._client = ModbusTcpClient(
+                host=self.host,
+                port=self.port,
+                timeout=DEFAULT_TIMEOUT,
+            )
+        else:
+            self._client = ModbusSerialClient(
+                port=self.serial_port,
+                baudrate=9600,
+                parity="N",
+                stopbits=1,
+                bytesize=8,
+                timeout=DEFAULT_TIMEOUT,
+            )
+
+    def write_register(self, address, value):
+        try:
+            self._client.close()
+        except Exception:
+            pass
+
+        if not self._client.connect():
+            raise Exception("Unable to connect for write")
+
+        rr = self._client.write_registers(address, [value])
+
+        self._client.close()
+        return rr
+
     def _extract_register_blocks(self, definition: dict):
         blocks = []
 
@@ -63,7 +91,6 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
         return blocks
 
     def _read_block(self, client, start: int, end: int):
-        """Read registers one by one and reconstruct the block."""
         values = {}
 
         try:
@@ -85,23 +112,12 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
             return None
 
     async def _async_update_data(self):
-        """Poll Modbus registers and return parsed values."""
+        client = self._client
 
-        if self.mode == "modbus":
-            client = ModbusTcpClient(
-                host=self.host,
-                port=self.port,
-                timeout=DEFAULT_TIMEOUT,
-            )
-        else:
-            client = ModbusSerialClient(
-                port=self.serial_port,
-                baudrate=9600,
-                parity="N",
-                stopbits=1,
-                bytesize=8,
-                timeout=DEFAULT_TIMEOUT,
-            )
+        try:
+            client.close()
+        except Exception:
+            pass
 
         if not client.connect():
             LOGGER.error("[Solarmodbus] Unable to connect to Modbus device")
@@ -114,10 +130,8 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
                 block = await self.hass.async_add_executor_job(
                     self._read_block, client, start, end
                 )
-
                 if block:
                     merged.update(block)
-
         finally:
             client.close()
 
