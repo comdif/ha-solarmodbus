@@ -65,6 +65,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         "definition": definition,
     }
 
+    async def async_write_register(call):
+        address = call.data["address"]
+        value = call.data["value"]
+        result = await hass.async_add_executor_job(
+            coordinator.write_register, address, value
+        )
+        _LOGGER.info("Write result: %s", result)
+
+    hass.services.async_register(DOMAIN, "write_register", async_write_register)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     _LOGGER.info("Solarmodbus integration initialized successfully")
