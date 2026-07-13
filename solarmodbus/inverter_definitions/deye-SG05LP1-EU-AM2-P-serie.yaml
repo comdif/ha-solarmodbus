@@ -179,6 +179,21 @@ parameters:
       registers: [0x00B6]
       icon: 'mdi:battery'
 
+    - name: "Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00F6]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: "mdi:transmission-tower"
+
  - group: Grid
    items: 
     - name: "Total Grid Power"
@@ -586,42 +601,54 @@ parameters:
       isstr: true
       lookup:
       -  key: 0
-         value: "Disable"
+         value: "Disabled"
       -  key: 1
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:solar-power"
 
-    - name: "Grid Charge"
+    - name: "Max Sell Power"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
       rule: 1
-      registers: [0x00F6]
-      isstr: true
-      lookup:
-      -  key: 0
-         value: "Disable"
-      -  key: 1
-         value: "Enable"
-      icon: "mdi:transmission-tower"
+      registers: [0x00F5]
+      icon: 'mdi:lightning-bolt-outline'
 
-    - name: "Load Priority Mode"
+    - name: "Max Solar Power"
       class: ""
       state_class: ""
       uom: ""
       scale: 1
       rule: 1
-      registers: [0x00F7]
+      registers: [0x0035]
+      icon: 'mdi:lightning-bolt-outline'
+
+    - name: "Energy Pattern"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      writerule: enum_write
+      registers: [0x00F3]
       isstr: true
       lookup:
       -  key: 0
          value: "Battery first"
       -  key: 1
          value: "Load first"
-      -  key: 2
-         value: "Grid first"
       icon: "mdi:home-lightning-bolt"
+
+    - name: "Zero export power"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00CE]
+      icon: 'mdi:lightning-bolt-outline'
+
 
     # ============================================================
     # SYSTEM WORK MODE 2 Time Of Use
@@ -629,19 +656,14 @@ parameters:
  - group: Time of Use
    items:
 
-    - name: "Time of Use"
+    - name: "Time of Use raw"
       class: ""
-      state_class: ""      
+      state_class: ""
       uom: ""
       scale: 1
-      rule: 1
+      rule: 0
       registers: [0x00F8]
-      isstr: true
-      lookup: 
-      -  key: 254
-         value: "OFF"
-      -  key: 255
-         value: "ON"
+      isstr: false
 
     - name: "Time of Use 1 Grid Charge"
       class: ""
@@ -653,13 +675,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 1 Gen Charge"
@@ -672,13 +694,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use 2 Grid Charge"
@@ -691,13 +713,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 2 Gen Charge"
@@ -710,13 +732,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use 3 Grid Charge"
@@ -729,13 +751,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 3 Gen Charge"
@@ -748,13 +770,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use 4 Grid Charge"
@@ -767,13 +789,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 4 Gen Charge"
@@ -786,13 +808,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use 5 Grid Charge"
@@ -805,13 +827,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 5 Gen Charge"
@@ -824,13 +846,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use 6 Grid Charge"
@@ -843,13 +865,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Enable"
+         value: "Enabled"
       -  key: 6
-         value: "Disable"
+         value: "Disabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:transmission-tower"
 
     - name: "Time of Use 6 Gen Charge"
@@ -862,13 +884,13 @@ parameters:
       isstr: true
       lookup:
       -  key: 4
-         value: "Disable"
+         value: "Disabled"
       -  key: 5
-         value: "Disable"
+         value: "Disabled"
       -  key: 6
-         value: "Enable"
+         value: "Enabled"
       -  key: 7
-         value: "Enable"
+         value: "Enabled"
       icon: "mdi:generator-portable"
 
     - name: "Time of Use Time 1"
@@ -877,6 +899,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FA]
       isstr: true
       icon: 'mdi:timelapse'
@@ -887,6 +910,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FB]
       isstr: true
       icon: 'mdi:timelapse'
@@ -897,6 +921,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FC]
       isstr: true
       icon: 'mdi:timelapse'
@@ -907,6 +932,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FD]
       isstr: true
       icon: 'mdi:timelapse'
@@ -917,6 +943,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FE]
       isstr: true
       icon: 'mdi:timelapse'
@@ -927,10 +954,10 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
+      customrule: hhmm
       registers: [0x00FF]
       isstr: true
       icon: 'mdi:timelapse'
-
 
     - name: "Time of Use Power 1"
       class: ""
@@ -1039,4 +1066,4 @@ parameters:
       rule: 1
       registers: [0x0111]
       icon: 'mdi:battery'
-      
+
