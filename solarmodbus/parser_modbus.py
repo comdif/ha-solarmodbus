@@ -1,7 +1,5 @@
 import logging
-
 _LOGGER = logging.getLogger(__name__)
-
 
 class ModbusValueParser:
     """
@@ -17,6 +15,7 @@ class ModbusValueParser:
     - offsets
     - lookups
     - scaling
+    - customrule (hhmm)
     """
 
     def __init__(self, definition: dict):
@@ -24,6 +23,18 @@ class ModbusValueParser:
 
     def _to_signed_16(self, v: int) -> int:
         return v - 65536 if v > 32767 else v
+
+    def apply_customrule(self, value, rule):
+        if rule == "hhmm":
+            try:
+                value = int(value)
+                hh = value // 100
+                mm = value % 100
+                return f"{hh:02d}:{mm:02d}"
+            except Exception:
+                return value
+
+        return value
 
     def parse_item(self, item: dict, raw_registers: dict):
         """Parse a single YAML-defined item."""
@@ -45,6 +56,7 @@ class ModbusValueParser:
 
         # 2) Apply rule
         rule = item.get("rule", 1)
+        customrule = item.get("customrule", None)
 
         if rule == 1:
             # uint16
@@ -102,21 +114,25 @@ class ModbusValueParser:
             # fallback: first raw register
             val = values[0]
 
-        # 3) Optional offset
+        # 3) Apply custom rule (hhmm, etc.)
+        if customrule:
+            val = self.apply_customrule(val, customrule)
+
+        # 4) Optional offset
         if "offset" in item:
             try:
                 val = val - item["offset"]
             except Exception:
                 _LOGGER.debug("Offset not applicable on %s", item.get("name"))
 
-        # 4) Optional lookup (numeric -> text)
+        # 5) Optional lookup (numeric -> text)
         if item.get("isstr") and "lookup" in item:
             for entry in item["lookup"]:
                 if entry["key"] == val:
                     val = entry["value"]
                     break
 
-        # 5) Scale
+        # 6) Scale
         scale = item.get("scale", 1)
         try:
             val = val * scale
