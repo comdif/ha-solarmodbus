@@ -1,6 +1,3 @@
-# ============================================================
-# MY PERSONAL DEYE INVERTER WORKING FILE FOR TEST
-# ============================================================
 requests:
   - start: 0x0003
     end: 0x0070
@@ -656,15 +653,6 @@ parameters:
  - group: Time of Use
    items:
 
-    - name: "Time of Use raw"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 0
-      registers: [0x00F8]
-      isstr: false
-
     - name: "Time of Use 1 Grid Charge"
       class: ""
       state_class: ""
@@ -1067,3 +1055,69 @@ parameters:
       registers: [0x0111]
       icon: 'mdi:battery'
 
+    # ============================================================
+    # RAW VALUES NEEDED FOR WRITING FEATURES
+    # ============================================================
+
+    - name: "Time of Use raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x00F8]
+      isstr: false
+
+    - name: "Tou1 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0112]
+      isstr: false
+
+    - name: "Tou2 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0113]
+      isstr: false
+
+    - name: "Tou3 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0114]
+      isstr: false
+
+    - name: "Tou4 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0115]
+      isstr: false
+
+    - name: "Tou5 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0116]
+      isstr: false
+
+    - name: "Tou6 charge raw"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0117]
+      isstr: false
