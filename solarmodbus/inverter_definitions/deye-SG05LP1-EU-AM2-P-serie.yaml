@@ -182,7 +182,7 @@ parameters:
       uom: ""
       scale: 1
       rule: 1
-      registers: [0x00F6]
+      registers: [0x00E8]
       isstr: true
       lookup:
       -  key: 0
@@ -394,22 +394,26 @@ parameters:
    items: 
     - name: "Running Status"
       class: ""
-      state_class: ""      
+      state_class: ""
       uom: ""
       scale: 1
       rule: 1
       registers: [0x003B]
       isstr: true
-      lookup: 
-      -  key: 0
-         value: "Stand-by"
-      -  key: 1
-         value: "Self-checking"
-      -  key: 2
-         value: "Normal"
-      -  key: 3
-         value: "FAULT"
-      icon: 'mdi:home-lightning-bolt'
+      icon: "mdi:home-lightning-bolt"
+      lookup:
+        - key: 0
+          value: "Stand-by"
+        - key: 1
+          value: "Self-test"
+        - key: 2
+          value: "Normal"
+        - key: 3
+          value: "Alarm"
+        - key: 4
+          value: "Fault"
+        - key: default
+          value: "Unknown"
 
     - name: "Total Power"
       class: "power"
@@ -559,13 +563,34 @@ parameters:
  - group: Alert
    items: 
     - name: "Alert"
-      class: ""
-      state_class: ""      
+      class: "enum"
+      state_class: ""
       uom: ""
       scale: 1
-      rule: 6
-      registers: [0x0065,0x0066,0x0067,0x0068,0x0069,0x006A]
-
+      rule: 3
+      registers: [0x0067, 0x0068, 0x0069, 0x006A]
+      icon: "mdi:message-alert-outline"
+      lookup:
+        - key: 0
+          value: "OK"
+        - bit: 6
+          value: "DC/DC Soft Start failure"
+        - bit: 9
+          value: "Auxiliary power supply failure"
+        - bit: 12
+          value: "Working mode changed"
+        - bit: 17
+          value: "AC Over-current failure"
+        - bit: 18
+          value: "Tz_Integ_Fault failure"
+        - bit: 19
+          value: "DC Over-current failure"
+        - bit: 22
+          value: "AC current leakage failure"
+        - bit: 63
+          value: "Temperature is too high"
+        - key: default
+          value: "Problem"
 
     # ============================================================
     # SYSTEM WORK MODE 1
