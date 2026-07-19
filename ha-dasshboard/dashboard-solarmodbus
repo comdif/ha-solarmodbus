@@ -1,3 +1,4 @@
+# Create a new empty dashboard in home assistant, paste this code and save #
 views:
   - type: panel
     path: overview
