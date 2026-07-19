@@ -1,0 +1,1521 @@
+views:
+  - type: panel
+    path: overview
+    title: Overview
+    cards:
+      - cardstyle: lite
+        wide: false
+        large_font: true
+        show_solar: true
+        show_battery: true
+        show_grid: true
+        center_no_grid: false
+        card_height: 100%
+        card_width: 100%
+        decimal_places: 2
+        decimal_places_energy: 1
+        dynamic_line_width: true
+        max_line_width: 4
+        min_line_width: 1
+        inverter:
+          modern: true
+          colour: "#9e9e9e"
+          autarky: power
+          model: deye
+          auto_scale: true
+          three_phase: false
+          navigate: ""
+          label_autarky: ""
+          label_ratio: ""
+        battery:
+          energy: 0
+          shutdown_soc: 20
+          show_daily: true
+          invert_flow: true
+        battery2:
+          energy: 0
+          shutdown_soc: 20
+          soc_end_of_charge: 100
+          invert_power: false
+          hide_soc: false
+          colour: "#ffc0cb"
+          show_remaining_energy: true
+          remaining_energy_to_shutdown: false
+          show_absolute: false
+          auto_scale: true
+          dynamic_colour: true
+          linear_gradient: true
+          animate: true
+          path_threshold: 100
+          navigate: ""
+          invert_flow: false
+        solar:
+          show_daily: true
+          mppts: 2
+          invert_flow: false
+        load:
+          show_daily: true
+          show_aux: false
+          invert_flow: false
+        grid:
+          show_daily_buy: true
+          show_daily_sell: false
+          show_nonessential: true
+        type: custom:sunsynk-power-flow-card
+        entities:
+          priority_load_243: sensor.solarmodbus_device_smartload_enable_status
+          inverter_status_59: sensor.solarmodbus_device_running_status
+          grid_connected_status_194: sensor.solarmodbus_device_grid_connected_status
+          inverter_voltage_154: sensor.solarmodbus_device_load_voltage
+          inverter_current_164: sensor.solarmodbus_device_current_l1
+          inverter_current_l2: sensor.solarmodbus_device_current_l2
+          inverter_power_175: sensor.solarmodbus_device_total_power
+          inverter_l1_power: sensor.solarmodbus_device_inverter_l1_power
+          inverter_l2_power: sensor.solarmodbus_device_inverter_l2_power
+          load_frequency_192: sensor.solarmodbus_device_load_frequency
+          essential_power: sensor.solarmodbus_device_load_l1_power
+          grid_power_169: sensor.solarmodbus_device_total_grid_power
+          grid_ct_power_172: sensor.solarmodbus_device_external_ct_l1_power
+          grid_ct_l2_power: sensor.solarmodbus_device_external_ct_l2_power
+          day_grid_import_76: sensor.solarmodbus_device_daily_energy_bought
+          day_grid_export_77: sensor.solarmodbus_device_daily_energy_sold
+          day_load_energy_84: sensor.solarmodbus_device_daily_load_consumption
+          pv1_power_186: sensor.solarmodbus_device_pv1_power
+          pv2_power_187: sensor.solarmodbus_device_pv2_power
+          pv1_voltage_109: sensor.solarmodbus_device_pv1_voltage
+          pv1_current_110: sensor.solarmodbus_device_pv1_current
+          pv2_voltage_111: sensor.solarmodbus_device_pv2_voltage
+          pv2_current_112: sensor.solarmodbus_device_pv2_current
+          day_pv_energy_108: sensor.solarmodbus_device_daily_production
+          aux_power_166: sensor.solarmodbus_device_micro_inverter_power
+          battery_voltage_183: sensor.solarmodbus_device_battery_voltage
+          battery_soc_184: sensor.solarmodbus_device_battery_soc
+          battery_power_190: sensor.solarmodbus_device_battery_power
+          battery_current_191: sensor.solarmodbus_device_battery_current
+          day_battery_charge_70: sensor.solarmodbus_device_daily_battery_charge
+          day_battery_discharge_71: sensor.solarmodbus_device_daily_battery_discharge
+          alert: sensor.solarmodbus_device_alert
+          use_timer_248: sensor.solarmodbus_device_grid_charge
+        card_mod:
+          style: |
+            :host {
+              height: auto !important;
+              width: 100% !important;
+            }
+            ha-card {
+              height: calc(100dvh - 110px) !important;
+              max-height: calc(100dvh - 110px) !important;
+              width: 100% !important;
+              overflow: hidden;
+            }
+
+            @media (orientation: portrait) {
+              ha-card {
+                height: calc(100dvh - 180px) !important;
+                max-height: calc(100dvh - 180px) !important;
+              }
+            }
+  - type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: System Work Mode-1
+            heading_style: subtitle
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_max_sell_power
+                    name: Set Max Sell Power
+                    icon: mdi:tune
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_zero_export_power
+                    name: Set Zero Export Power
+                    icon: mdi:tune
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_max_solar_power
+                    name: Set Max Solar Power
+                    icon: mdi:tune
+                    step: 100
+          - type: heading
+            heading: Sell to Grid / Zero export load / Zero export CT
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_system_work_mode
+                name: Sell to grid
+                icon: mdi:transmission-tower-export
+                tap_action:
+                  action: call-service
+                  service: script.modbuswrite
+                  data:
+                    address: 244
+                    value: 0
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          return entity.state === "Sell to grid"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                    - padding: 10px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          return entity.state === "Sell to grid"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          return entity.state === "Sell to grid"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_system_work_mode
+                name: Zero export load
+                icon: mdi:home-lightning-bolt
+                tap_action:
+                  action: call-service
+                  service: script.modbuswrite
+                  data:
+                    address: 244
+                    value: 1
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          return entity.state === "Zero export load"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                    - padding: 10px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          return entity.state === "Zero export load"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          return entity.state === "Zero export load"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_system_work_mode
+                name: Zero export CT
+                icon: mdi:current-ac
+                tap_action:
+                  action: call-service
+                  service: script.modbuswrite
+                  data:
+                    address: 244
+                    value: 2
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          return entity.state === "Zero export CT"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                    - padding: 10px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          return entity.state === "Zero export CT"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          return entity.state === "Zero export CT"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+          - type: heading
+            heading: Energy pattern
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_energy_pattern
+                name: Load first
+                icon: mdi:transmission-tower-export
+                tap_action:
+                  action: call-service
+                  service: script.modbuswrite
+                  data:
+                    address: 243
+                    value: 1
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          return entity.state === "Load first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 165px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          return entity.state === "Load first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          return entity.state === "Load first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_energy_pattern
+                name: Battery first
+                icon: mdi:car-battery
+                tap_action:
+                  action: call-service
+                  service: script.modbuswrite
+                  data:
+                    address: 243
+                    value: 0
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          return entity.state === "Battery first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 165px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          return entity.state === "Battery first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          return entity.state === "Battery first"
+                            ? "#8fd48f"
+                            : "";
+                        ]]]
+      - type: grid
+        cards:
+          - type: heading
+            heading: Solar sell
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - entity: sensor.solarmodbus_device_solar_sell
+                    state: Enabled
+                card:
+                  type: custom:button-card
+                  entity: sensor.solarmodbus_device_solar_sell
+                  name: Disable Solar Sale
+                  icon: mdi:block-helper
+                  tap_action:
+                    action: call-service
+                    service: script.modbuswrite
+                    data:
+                      address: 247
+                      value: 0
+                  styles:
+                    card:
+                      - border: 2px solid
+                      - border-color: "#8fd48f"
+                      - padding: 10px
+                      - width: 150px
+                      - height: 90px
+                    name:
+                      - font-size: 14px
+                      - font-weight: 600
+                    icon:
+                      - width: 32px
+                      - height: 32px
+                      - color: "#8fd48f"
+              - type: conditional
+                conditions:
+                  - entity: sensor.solarmodbus_device_solar_sell
+                    state: Disabled
+                card:
+                  type: custom:button-card
+                  entity: sensor.solarmodbus_device_solar_sell
+                  name: Enable Solar Sell
+                  icon: mdi:solar-power
+                  tap_action:
+                    action: call-service
+                    service: script.modbuswrite
+                    data:
+                      address: 247
+                      value: 1
+                  styles:
+                    card:
+                      - border: 2px solid
+                      - border-color: "#8fd48f"
+                      - padding: 10px
+                      - width: 150px
+                      - height: 90px
+                    name:
+                      - font-size: 14px
+                      - font-weight: 600
+                    icon:
+                      - width: 32px
+                      - height: 32px
+                      - color: "#8fd48f"
+          - type: heading
+            heading: Setup days
+            heading_style: subtitle
+          - type: vertical-stack
+            cards:
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    entity: input_boolean.day_mon
+                    name: Mon
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+                  - type: custom:button-card
+                    entity: input_boolean.day_tue
+                    name: Tue
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+                  - type: custom:button-card
+                    entity: input_boolean.day_wed
+                    name: Wed
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+                  - type: custom:button-card
+                    entity: input_boolean.day_thu
+                    name: Thu
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+              - type: horizontal-stack
+                cards:
+                  - type: custom:button-card
+                    entity: input_boolean.day_fri
+                    name: Fri
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+                  - type: custom:button-card
+                    entity: input_boolean.day_sat
+                    name: Sat
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+                  - type: custom:button-card
+                    entity: input_boolean.day_sun
+                    name: Sun
+                    show_state: false
+                    state:
+                      - value: "on"
+                        styles:
+                          card:
+                            - border: 2px solid green
+                          icon:
+                            - color: green
+                    styles:
+                      card:
+                        - width: 55px
+                        - height: 55px
+                        - border-radius: 8px
+                        - font-size: 13px
+                        - padding: 0
+          - type: heading
+            heading: Time of Use
+            heading_style: subtitle
+          - type: custom:button-card
+            entity: sensor.solarmodbus_device_time_of_use
+            name: Time Of Use
+            show_state: true
+            icon: mdi:clock
+            tap_action:
+              action: call-service
+              service: script.modbuswrite
+              data:
+                address: 248
+                value: |
+                  [[[
+                    const current = parseInt(states['sensor.solarmodbus_device_time_of_use_raw'].state);
+                    const tou = states['sensor.solarmodbus_device_time_of_use'].state;
+
+                    if (tou === 'Enabled') {
+                      return current - 1;
+                    } else {
+                      return current + 1;
+                    }
+                  ]]]
+            state:
+              - value: Enabled
+                styles:
+                  card:
+                    - border: 2px solid green
+                  icon:
+                    - color: green
+            styles:
+              card:
+                - width: 335px
+                - height: 85px
+                - border-radius: 8px
+                - font-size: 16px
+    header:
+      layout: responsive
+      badges_position: bottom
+      badges_wrap: wrap
+    max_columns: 2
+    cards: []
+    title: System Work Mode-1
+    dense_section_placement: true
+  - type: sections
+    max_columns: 4
+    title: System Work Mode-2
+    path: system-work-mode-2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: System Work Mode-2
+            heading_style: subtitle
+          - type: heading
+            heading: Time 1
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou1_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7) ? "T1 Grid (Enabled)" : "T1 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 1
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "green" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 165px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "green" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou1_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T1 Gen (Enabled)"
+                      : "T1 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 1
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "green" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 165px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "green" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_1
+                name: Start Time 1
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_2
+                name: Stop Time 1
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou1_power
+                    name: Max Charge Power T1
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou1_soc
+                    name: Target SOC Batt T1
+                    icon: mdi:battery
+                    step: 1
+          - type: heading
+            heading: Time 2
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou2_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7)
+                      ? "T2 Grid (Enabled)"
+                      : "T2 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 2
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou2_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T2 Gen (Enabled)"
+                      : "T2 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 2
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_2
+                name: Start Time 2
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_3
+                name: Stop Time 2
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou2_power
+                    name: Power T2
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou2_soc
+                    name: Batt T2
+                    icon: mdi:battery
+                    step: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Time 3
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou3_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7)
+                      ? "T3 Grid (Enabled)"
+                      : "T3 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 3
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou3_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T3 Gen (Enabled)"
+                      : "T3 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 3
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_3
+                name: Start Time 3
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_4
+                name: Stop Time 3
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou3_power
+                    name: Power T3
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou3_soc
+                    name: Batt T3
+                    icon: mdi:battery
+                    step: 1
+          - type: heading
+            heading: Time 4
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou4_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7)
+                      ? "T4 Grid (Enabled)"
+                      : "T4 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 4
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou4_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T4 Gen (Enabled)"
+                      : "T4 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 4
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_4
+                name: Start Time 4
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_5
+                name: Stop Time 4
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou4_power
+                    name: Power T4
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou4_soc
+                    name: Batt T4
+                    icon: mdi:battery
+                    step: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Time 5
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou5_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7)
+                      ? "T5 Grid (Enabled)"
+                      : "T5 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 5
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou5_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T5 Gen (Enabled)"
+                      : "T5 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 5
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_5
+                name: Start Time 5
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_6
+                name: Stop Time 5
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou5_power
+                    name: Power T5
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou5_soc
+                    name: Batt T5
+                    icon: mdi:battery
+                    step: 1
+          - type: heading
+            heading: Time 6
+            heading_style: subtitle
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou6_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 5 || v === 7)
+                      ? "T6 Grid (Enabled)"
+                      : "T6 Grid (Disabled)";
+                  ]]]
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 6
+                    source: grid
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 5 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_tou6_charge_raw
+                name: |
+                  [[[
+                    const v = parseInt(entity.state);
+                    return (v === 6 || v === 7)
+                      ? "T6 Gen (Enabled)"
+                      : "T6 Gen (Disabled)";
+                  ]]]
+                icon: mdi:generator-portable
+                tap_action:
+                  action: call-service
+                  service: script.write_tou_charge_mode
+                  data:
+                    slot: 6
+                    source: gen
+                styles:
+                  card:
+                    - border: 2px solid
+                    - border-color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                    - padding: 10px
+                    - width: 160px
+                    - height: 90px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+                  icon:
+                    - width: 32px
+                    - height: 32px
+                    - color: |
+                        [[[
+                          const v = parseInt(entity.state);
+                          return (v === 6 || v === 7) ? "#8fd48f" : "";
+                        ]]]
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_6
+                name: Start Time 6
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+              - type: custom:button-card
+                entity: sensor.solarmodbus_device_time_of_use_time_1
+                name: Stop Time 6
+                icon: mdi:clock-outline
+                show_state: true
+                styles:
+                  card:
+                    - border: 2px solid
+                    - padding: 3px
+                    - width: 165px
+                    - height: 70px
+                  name:
+                    - font-size: 12px
+                    - font-weight: 600
+                    - color: green
+                  icon:
+                    - width: 22px
+                    - height: 22px
+          - type: grid
+            columns: 1
+            square: false
+            cards:
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou6_power
+                    name: Power T6
+                    icon: mdi:lightning-bolt
+                    step: 100
+              - type: entities
+                entities:
+                  - type: custom:numberbox-card
+                    entity: input_number.write_tou6_soc
+                    name: Batt T6
+                    icon: mdi:battery
+                    step: 1
+  - title: State
+    path: State
+    type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: State
+            heading_style: title
+          - type: sensor
+            entity: sensor.solarmodbus_device_running_status
+            name: Status
+          - type: sensor
+            entity: sensor.solarmodbus_device_alert
+            name: Alert
+          - type: sensor
+            entity: sensor.solarmodbus_device_grid_connected_status
+            name: Grid Connected
+          - type: sensor
+            entity: sensor.solarmodbus_device_dc_temperature
+            detail: 1
+            name:
+              type: entity
+          - type: sensor
+            entity: sensor.battery_state
+          - graph: none
+            type: sensor
+            entity: sensor.solarmodbus_device_battery_soc
+            detail: 1
+            name:
+              type: entity
+        column_span: 4
+      - type: grid
+        cards: []
+    max_columns: 4
+    cards: []
