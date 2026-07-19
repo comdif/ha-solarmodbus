@@ -33,38 +33,53 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     host = entry.data.get("host")
     port = entry.data.get("port")
     serial_port = entry.data.get("serial_port")
-    slave_id = entry.data.get("slave_id")
     model = entry.data.get("model")
 
+    # --- Solarman inverter serial (must be int) ---
+    serial_number_raw = entry.data.get("inverter_serial_number")
+    if mode == "solarman":
+        try:
+            serial_number = int(serial_number_raw)
+        except Exception:
+            raise ConfigEntryNotReady(
+                f"Invalid Solarman serial number (must be integer): {serial_number_raw}"
+            )
+    else:
+        serial_number = entry.data.get("slave_id")
+
+    # --- Load YAML definition ---
     yaml_path = os.path.join(
         hass.config.path(DEFINITIONS_PATH),
         model,
     )
-
     definition = await hass.async_add_executor_job(load_yaml_file, yaml_path)
 
+    # --- Coordinator creation ---
     coordinator = SolarmodbusCoordinator(
         hass=hass,
         mode=mode,
         host=host,
         port=port,
         serial_port=serial_port,
-        slave_id=slave_id,
+        slave_id=serial_number,
         definition=definition,
     )
 
+    # --- First refresh ---
     try:
         await coordinator.async_config_entry_first_refresh()
     except Exception as err:
         _LOGGER.error("Unable to initialize Solarmodbus connection: %s", err)
         raise ConfigEntryNotReady from err
 
+    # --- Store coordinator ---
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         COORDINATOR_NAME: coordinator,
         "definition": definition,
     }
 
+    # --- Write register service ---
     async def async_write_register(call):
         address = call.data["address"]
         value = call.data["value"]
@@ -75,6 +90,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     hass.services.async_register(DOMAIN, "write_register", async_write_register)
 
+    # --- Forward platforms ---
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     _LOGGER.info("Solarmodbus integration initialized successfully")
