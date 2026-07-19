@@ -1,17 +1,37 @@
-# ha-solarmodbus
+# ha-solarmodbus V2
 
 **Local Modbus integration for Solarman‑compatible inverters (Deye, Sunsynk, LuxPower, Sofar…).  
-100% local · Multi‑brand · Extensible · No cloud required**
+100% local · Multi‑brand · YAML‑driven · No cloud required**
+
+---
+
+# 🚀 Major New Features in V2
+
+### ✔️ **Native support for the original Deye/Sunsynk Solarman dongle**  
+Solarmodbus V2 can communicate **directly with the OEM WiFi/LAN dongle**,  
+using the local Solarman V5 protocol — **no cloud**, **no gateway**, **no API keys**.
+
+This is enabled through the official Python library:
+
+### 🔗 `pysolarmanv5` by jmccrohan  
+https://github.com/jmccrohan/pysolarmanv5
+
+The integration now supports:
+
+- direct local communication with the Solarman V5 dongle  
+- automatic detection of inverter model  
+- stable polling without Modbus TCP hardware  
+- full compatibility with Deye/Sunsynk OEM dongles
 
 ---
 
 ## 📌 Important Notice
 
-This integration uses the **public inverter register definitions** from the  
-**Solarman Python project by Stephan Joubert**, specifically the directory: inverter_definitions/
+Solarmodbus V2 also uses the **public inverter register definitions** from the  
+**Solarman Python project by Stephan Joubert** (`inverter_definitions/`).
 
-These YAML files are used **as reference material** for Modbus register mapping.  
-This project is **not** a fork of his work, and all Home Assistant code here is entirely original.
+These YAML files are used **only as reference material** for Modbus register mapping.  
+All Home Assistant code is **entirely original**.
 
 Original project:  
 https://github.com/StephanJoubert/solarman
@@ -20,85 +40,76 @@ https://github.com/StephanJoubert/solarman
 
 ## 🧪 Hardware Used for Testing
 
-All development and validation were performed using:
+### ✔️ **Deye/Sunsynk OEM Solarman V5 dongle**  
+Validated for full local operation via `pysolarmanv5`.
 
-### ✔️ **Ebyte NA111-E Modbus TCP → RS485 gateway**  
-Product page:  
-https://www.cdebyte.com/products/NA111-E
+### ✔️ **Ebyte NA111‑E Modbus TCP → RS485 gateway**  
+Validated for Modbus TCP operation.
 
-This device was used to test:
+### ✔️ **FTDI USB‑RS485 adapter**  
+Validated for direct Modbus RTU.
 
-- Modbus TCP communication  
-- multi‑range polling  
-- register decoding  
-- stability and timing  
-- compatibility with Deye Hybrid inverters  
-
-### ✔️ **FTDI USB‑RS485 adapter (direct connection)**
-
-The integration also works **without any gateway**, using a simple USB‑RS485 FTDI adapter connected directly to the inverter’s RS485 port.
-
-This allows:
-
-- direct Modbus RTU → Home Assistant communication  
-- testing without network hardware  
-- debugging register responses  
-- validating wiring and polarity  
-
-Both methods are fully supported.
+All three modes are fully supported in V2.
 
 ---
 
 ## 📌 Overview
 
-**solarmodbus** is a fully local Home Assistant integration designed to read, decode, and expose Modbus TCP data from hybrid inverters compatible with the *Solarman* ecosystem.
+Solarmodbus V2 is a fully local Home Assistant integration that reads and decodes  
+Modbus data from Solarman‑compatible inverters using:
 
-Unlike cloud‑based Solarman solutions, this integration communicates **directly with the inverter over Modbus TCP**, providing:
+- **Solarman V5 local protocol (OEM dongle)**  
+- **Modbus TCP**  
+- **Modbus RTU**
 
-- fast and stable updates  
-- zero cloud dependency  
-- no external accounts or API keys  
-- full data ownership  
-- multi‑brand support through YAML register definitions  
+V2 introduces a clean, modular architecture:
 
-The integration uses a flexible architecture based on YAML files describing the Modbus register maps for each inverter brand/model. This makes it easy for the community to contribute additional definitions and expand compatibility.
+- unified YAML V2 register definitions  
+- stable coordinator  
+- modular parsing engine  
+- multi‑brand support  
+- fast multi‑range polling  
+- zero cloud dependency
 
 ---
 
-## ✨ Features
+## ✨ Features (V2)
 
-- 🔌 **Direct Modbus TCP communication** (no cloud, no API keys)  
-- ⚡ **Fast updates** with multi‑range polling  
-- 🧩 **Multi‑brand architecture** (Deye, Sunsynk, LuxPower, Sofar…)  
-- 📄 **YAML‑based register definitions**  
-- 🔍 **Advanced parsing engine**  
-  - endianness handling  
-  - Solarman rule system  
-  - bitmasks  
+- 🔌 Solarman V5 local protocol (OEM dongle)  
+- 🔌 Modbus TCP & RTU  
+- ⚡ Optimized multi‑range polling  
+- 📄 Unified YAML V2 register definitions  
+- 🔍 Advanced parsing engine  
+  - endianness  
+  - bitmask  
+  - multi‑register values  
   - offsets  
   - string decoding  
-  - multi‑register values  
-- 🏠 **Native Home Assistant entities**  
-- 🛠️ **Extensible by the community**  
+- 🏠 Native Home Assistant entities  
+- 🧱 Clean architecture (coordinator + parser + loader)  
+- 🛠️ Easily extensible for new inverter models  
 
 ---
 
 ## 🚧 Current Status
 
-- ✔️ Fully working on **Deye Hybrid** (validated)  
-- ✔️ Architecture ready for **multi‑brand support**  
-- ⏳ Additional YAML definitions needed for other brands  
+- ✔️ Fully working on **Deye LP1 / Hybrid**  
+- ✔️ Full support for **OEM Solarman V5 dongle**  
+- ✔️ YAML V2 ready for multi‑brand support  
+- ⏳ Additional inverter definitions in progress  
 - 🤝 Community contributions welcome  
 
 ---
 
-[📄 Solarmodbus Documentation (PDF)](./solarmodbus.pdf)
+## 📥 Installation
 
--    How to install on HAOS:
+### 🟦 HAOS
 
 Just past this one-line on you ssh console:
 
-`unzip -o <(curl -fsSL https://github.com/comdif/ha-solarmodbus/archive/refs/heads/main.zip) -d /tmp && cp -r /tmp/ha-solarmodbus-main/solarmodbus /config/custom_components/ && ha core restart`
+`unzip -o <(curl -fsSL https://github.com/comdif/ha-solarmodbus/archive/refs/heads/v2.zip) -d /tmp \
+  && cp -r /tmp/ha-solarmodbus-v2/solarmodbus /config/custom_components/ \
+  && ha core restart`
 
 -    How to install on other OS:
 
@@ -106,4 +117,6 @@ Just copy the solarmodbus directory in your HA custom-component directory.
 
 -    How to install on ANY OS with an universal installer:
 
-`bash <(curl -fsSL https://raw.githubusercontent.com/comdif/ha-solarmodbus/refs/heads/main/uinstall.sh) https://github.com/comdif/ha-solarmodbus/archive/refs/heads/main.zip`
+`bash <(curl -fsSL https://raw.githubusercontent.com/comdif/ha-solarmodbus/refs/heads/v2/uinstall.sh) \
+  https://github.com/comdif/ha-solarmodbus/archive/refs/heads/v2.zip
+`
