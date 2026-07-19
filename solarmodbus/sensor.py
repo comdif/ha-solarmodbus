@@ -1,15 +1,13 @@
-import logging
+from __future__ import annotations
+
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import EntityCategory
 
 from .const import DOMAIN, COORDINATOR_NAME
 
-_LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up Solarmodbus sensors from YAML definition."""
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data[COORDINATOR_NAME]
     definition = data["definition"]
@@ -17,75 +15,70 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = []
 
     for group in definition.get("parameters", []):
-        group_name = group.get("group", "unknown")
-
         for item in group.get("items", []):
+
+            key = item["name"]
+
+            is_text = (
+                item.get("class") not in ("energy", "power", "voltage", "current")
+                and not item.get("state_class")
+                and not item.get("uom")
+            )
+
             entities.append(
                 SolarmodbusSensor(
                     coordinator=coordinator,
-                    description=item,
-                    group=group_name,
-                    entry_id=entry.entry_id,
+                    yaml=item,
+                    is_text=is_text,
                 )
             )
 
     async_add_entities(entities)
-    _LOGGER.info("Solarmodbus: %s sensors loaded", len(entities))
 
 
 class SolarmodbusSensor(CoordinatorEntity, SensorEntity):
-    """Representation of a sensor defined in the YAML file."""
-
-    def __init__(self, coordinator, description, group, entry_id):
+    def __init__(self, coordinator, yaml, is_text):
         super().__init__(coordinator)
 
-        self._desc = description
-        self._group = group
-        self._entry_id = entry_id
+        self.coordinator = coordinator
+        self.yaml = yaml
+        self.is_text = is_text
 
-        name = description["name"]
+        name = yaml["name"]
 
-        # Unique ID
-        self._attr_unique_id = f"solarmodbus_{entry_id}_{name.replace(' ', '_')}"
         self._attr_name = name
 
-        # Unit of measurement
-        self._attr_native_unit_of_measurement = (
-            description.get("uom") or description.get("unit")
-        )
+        if coordinator.mode == "solarman":
+            self._attr_unique_id = (
+                f"{coordinator.config_entry.entry_id}_{name}"
+            )
+        else:
+            self._attr_unique_id = f"{DOMAIN}_{name}"
 
-        # Device class
-        if description.get("class"):
-            self._attr_device_class = description["class"]
+        if self.is_text:
+            self._attr_device_class = None
+            self._attr_state_class = None
+            self._attr_native_unit_of_measurement = None
 
-        # State class
-        if description.get("state_class"):
-            self._attr_state_class = description["state_class"]
+        else:
+            self._attr_device_class = yaml.get("class")
+            self._attr_state_class = yaml.get("state_class")
+            self._attr_native_unit_of_measurement = (
+                yaml.get("uom") or yaml.get("unit")
+            )
 
-        # Icon
-        self._attr_icon = description.get("icon")
+        self._attr_icon = yaml.get("icon")
 
-        # Category (diagnostic, config…)
-        if description.get("category") == "diagnostic":
+        if yaml.get("category") == "diagnostic":
+            from homeassistant.const import EntityCategory
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, "solarmodbus_device")},
+            name="Solarmodbus Device",
+            manufacturer="Solarmodbus",
+        )
 
     @property
     def native_value(self):
-        """Return the parsed value from the coordinator."""
-        val = self.coordinator.data.get(self._desc["name"])
-        return val if val is not None else None
-
-    @property
-    def available(self):
-        """Entity availability based on coordinator success."""
-        return self.coordinator.last_update_success
-
-    @property
-    def device_info(self):
-        """Return device information for grouping sensors."""
-        return {
-            "identifiers": {(DOMAIN, self._entry_id)},
-            "name": "Solarmodbus Device",
-            "manufacturer": "Modbus",
-            "model": "Generic Modbus Device",
-        }
+        return self.coordinator.data.get(self.yaml["name"])
