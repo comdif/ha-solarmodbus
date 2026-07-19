@@ -28,6 +28,9 @@ CONF_MODEL = "model"
 CONF_HELP = "help_text"
 
 
+CONF_LOGGER_SERIAL = "logger_serial_number"
+
+
 def _test_tcp_connection(host: str, port: int, timeout: float = 2.0) -> bool:
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,11 +42,12 @@ def _test_tcp_connection(host: str, port: int, timeout: float = 2.0) -> bool:
         return False
 
 
-def _list_yaml_models(hass) -> dict:
+async def _list_yaml_models(hass) -> dict:
     models = {}
     try:
         base = hass.config.path(DEFINITIONS_PATH)
-        for file in os.listdir(base):
+        files = await hass.async_add_executor_job(os.listdir, base)
+        for file in files:
             if file.endswith(".yaml"):
                 name = file.replace(".yaml", "")
                 models[file] = name
@@ -64,13 +68,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             if mode == "modbus":
                 return await self.async_step_modbus()
-            else:
+
+            if mode == "serial":
                 return await self.async_step_serial()
+
+            if mode == "solarman":
+                return await self.async_step_solarman()
 
         schema = vol.Schema({
             vol.Required(CONF_MODE, default=DEFAULT_MODE): vol.In({
                 "modbus": "Modbus TCP (Ethernet / LAN)",
                 "serial": "Modbus RTU (USB/RS485)",
+                "solarman": "Solarman Logger (WiFi/LAN)",
             })
         })
 
@@ -82,7 +91,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_modbus(self, user_input=None):
         errors = {}
-        models = _list_yaml_models(self.hass)
+        models = await _list_yaml_models(self.hass)
 
         if user_input is not None:
             host = user_input[CONF_HOST]
@@ -116,11 +125,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_serial(self, user_input=None):
         errors = {}
-        models = _list_yaml_models(self.hass)
+        models = await _list_yaml_models(self.hass)
 
         help_text = (
-            "Serial device path. Common values: /dev/ttyUSB0, /dev/ttyUSB1, /dev/ttyACM0. "
-            "Must be verified on the system."
+            "Serial device path. Common values: /dev/ttyUSB0, /dev/ttyUSB1, /dev/ttyACM0."
         )
 
         if user_input is not None:
@@ -140,6 +148,47 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="serial",
+            data_schema=schema,
+            errors=errors,
+        )
+
+    async def async_step_solarman(self, user_input=None):
+        errors = {}
+        models = await _list_yaml_models(self.hass)
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            port = user_input[CONF_PORT]
+            logger_serial = user_input[CONF_LOGGER_SERIAL]
+
+            ok = await self.hass.async_add_executor_job(
+                _test_tcp_connection, host, port
+            )
+
+            if ok:
+                user_input[CONF_MODE] = "solarman"
+                return self.async_create_entry(
+                    title=f"Solarman Logger ({host})",
+                    data=user_input,
+                )
+            else:
+                errors["base"] = "cannot_connect"
+
+        schema = vol.Schema({
+            vol.Required(CONF_HOST, default="192.168.1.200"): str,
+            vol.Required(CONF_PORT, default=8899): int,
+
+
+            vol.Required(
+                CONF_LOGGER_SERIAL,
+                description="Device Serial Number (Logger SN)"
+            ): int,
+
+            vol.Required(CONF_MODEL): vol.In(models),
+        })
+
+        return self.async_show_form(
+            step_id="solarman",
             data_schema=schema,
             errors=errors,
         )
