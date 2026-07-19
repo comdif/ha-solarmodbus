@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from pymodbus.client import ModbusTcpClient, ModbusSerialClient
+from pysolarmanv5 import PySolarmanV5
 
 from .const import DEFAULT_TIMEOUT
 from .parser_modbus import ModbusValueParser
@@ -35,9 +36,9 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
 
         self.mode = mode
         self.host = host
-        self.port = port
+        self.port = port or 8899
         self.serial_port = serial_port
-        self.slave_id = slave_id
+        self.slave_id = int(slave_id)
         self.definition = definition
 
         self.parser = ModbusValueParser(definition)
@@ -49,7 +50,8 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
                 port=self.port,
                 timeout=DEFAULT_TIMEOUT,
             )
-        else:
+
+        elif self.mode == "serial":
             self._client = ModbusSerialClient(
                 port=self.serial_port,
                 baudrate=9600,
@@ -59,7 +61,28 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
                 timeout=DEFAULT_TIMEOUT,
             )
 
+        elif self.mode == "solarman":
+            self._client = PySolarmanV5(
+                self.host,
+                self.slave_id,
+                port=self.port,
+                mb_slave_id=1,
+                socket_timeout=60,
+                v5_error_correction=False
+            )
+
+    # ---------------------------------------------------------
+    # WRITE REGISTER — MODBUS / SERIAL / SOLARMAN V5
+    # ---------------------------------------------------------
     def write_register(self, address, value):
+        # SOLARMAN V5 → FC16 (write multiple)
+        if self.mode == "solarman":
+            return self._client.write_multiple_holding_registers(
+                register_addr=address,
+                values=[value],
+            )
+
+        # MODBUS / SERIAL → version stable, inchangée
         try:
             self._client.close()
         except Exception:
@@ -90,7 +113,7 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
         blocks.sort(key=lambda x: x[0])
         return blocks
 
-    def _read_block(self, client, start: int, end: int):
+    def _read_block_modbus(self, client, start: int, end: int):
         values = {}
 
         try:
@@ -111,29 +134,45 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
             LOGGER.error(f"[Solarmodbus] Exception reading block {start}-{end}: {e}")
             return None
 
-    async def _async_update_data(self):
-        client = self._client
-
+    def _read_block_solarman(self, start: int, end: int):
+        count = end - start + 1
         try:
-            client.close()
-        except Exception:
-            pass
+            regs = self._client.read_holding_registers(start, count)
+            return {start + i: regs[i] for i in range(count)}
+        except Exception as e:
+            LOGGER.error(f"[Solarman] Error reading {start}-{end}: {e}")
+            return None
 
-        if not client.connect():
-            LOGGER.error("[Solarmodbus] Unable to connect to Modbus device")
-            return {}
-
+    async def _async_update_data(self):
         merged = {}
 
-        try:
+        if self.mode in ("modbus", "serial"):
+            client = self._client
+
+            try:
+                client.close()
+            except Exception:
+                pass
+
+            if not client.connect():
+                LOGGER.error("[Solarmodbus] Unable to connect to Modbus device")
+                return {}
+
+            try:
+                for start, end in self.requests:
+                    block = await self.hass.async_add_executor_job(
+                        self._read_block_modbus, client, start, end
+                    )
+                    if block:
+                        merged.update(block)
+            finally:
+                client.close()
+
+        elif self.mode == "solarman":
             for start, end in self.requests:
-                block = await self.hass.async_add_executor_job(
-                    self._read_block, client, start, end
-                )
+                block = self._read_block_solarman(start, end)
                 if block:
                     merged.update(block)
-        finally:
-            client.close()
 
         if not merged:
             LOGGER.error("[Solarmodbus] No registers read")
