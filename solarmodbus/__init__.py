@@ -35,9 +35,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     serial_port = entry.data.get("serial_port")
     model = entry.data.get("model")
 
-    # --- Solarman inverter serial (must be int) ---
-    serial_number_raw = entry.data.get("inverter_serial_number")
+    # --- Solarman logger serial (must be int) ---
     if mode == "solarman":
+        serial_number_raw = entry.data.get("logger_serial_number")
         try:
             serial_number = int(serial_number_raw)
         except Exception:
