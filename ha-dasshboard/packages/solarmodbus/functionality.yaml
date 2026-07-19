@@ -1,0 +1,384 @@
+solarmodbus_functionality:
+
+  # ######## INPUT NUMBER ########
+  input_number:
+    write_max_sell_power:
+      name: Max Sell Power
+      min: 500
+      max: 10000
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+
+    write_zero_export_power:
+      name: Zero Export Power
+      min: 20
+      max: 500
+      step: 10
+      unit_of_measurement: "W"
+      mode: slider
+
+    write_max_solar_power:
+      name: Max Solar Power
+      min: 500
+      max: 12000
+      step: 10
+      unit_of_measurement: "W"
+      mode: slider
+
+    write_tou1_power:
+      name: TOU1 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou1_soc:
+      name: TOU1 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+    write_tou2_power:
+      name: TOU2 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou2_soc:
+      name: TOU2 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+    write_tou3_power:
+      name: TOU3 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou3_soc:
+      name: TOU3 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+    write_tou4_power:
+      name: TOU4 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou4_soc:
+      name: TOU4 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+    write_tou5_power:
+      name: TOU5 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou5_soc:
+      name: TOU5 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+    write_tou6_power:
+      name: TOU6 Power
+      min: 0
+      max: 5500
+      step: 100
+      unit_of_measurement: "W"
+      mode: slider
+    write_tou6_soc:
+      name: TOU6 SOC
+      min: 19
+      max: 100
+      step: 1
+      unit_of_measurement: "%"
+      mode: slider
+
+  # ######## INPUT BOOLEAN ########
+  input_boolean:
+    day_mon:
+      name: Monday
+    day_tue:
+      name: Tuesday
+    day_wed:
+      name: Wednesday
+    day_thu:
+      name: Thursday
+    day_fri:
+      name: Friday
+    day_sat:
+      name: Saturday
+    day_sun:
+      name: Sunday
+
+  # ########### SCRIPT ###########
+  script:
+    modbuswrite:
+      alias: modbuswrite
+      description: ""
+      fields:
+        address:
+          description: Register
+        value:
+          description: Value
+      sequence:
+        - action: solarmodbus.write_register
+          data:
+            address: "{{ address | int }}"
+            value: "{{ value | int }}"
+
+    write_tou_value:
+      alias: "Write TOU Value"
+      mode: single
+      fields:
+        slot:
+          description: "TOU slot number (1-6)"
+        kind:
+          description: "Type: power or soc"
+        value:
+          description: "Value to write"
+      sequence:
+        - variables:
+            addr_power: "{{ {1:256, 2:257, 3:258, 4:259, 5:260, 6:261}[slot|int] }}"
+            addr_soc:   "{{ {1:268, 2:269, 3:270, 4:271, 5:272, 6:273}[slot|int] }}"
+            addr: "{{ addr_power if kind == 'power' else addr_soc }}"
+        - service: script.modbuswrite
+          data:
+            address: "{{ addr }}"
+            value: "{{ value | int }}"
+
+    write_tou_charge_mode:
+      alias: "Write TOU Charge Mode"
+      mode: single
+      fields:
+        slot:
+          description: "TOU slot number (1-6)"
+        source:
+          description: "grid or gen"
+      sequence:
+        - variables:
+            addr: "{{ {1:274, 2:275, 3:276, 4:277, 5:278, 6:279}[slot|int] }}"
+            v: "{{ states('sensor.solarmodbus_device_tou' ~ slot ~ '_charge_raw') | int }}"
+            new: >
+              {% if source == 'grid' %}
+                {% if v == 4 %}5{% elif v == 5 %}4{% elif v == 6 %}7{% elif v == 7 %}6{% else %}{{ v }}{% endif %}
+              {% else %}
+                {% if v == 4 %}6{% elif v == 6 %}4{% elif v == 5 %}7{% elif v == 7 %}5{% else %}{{ v }}{% endif %}
+              {% endif %}
+        - service: script.modbuswrite
+          data:
+            address: "{{ addr }}"
+            value: "{{ new }}"
+
+
+  # ########### TEMPLATE ###########
+  template:
+    - sensor:
+        - name: "Home Off-grid Power"
+          unique_id: home_offgrid_power
+          unit_of_measurement: "W"
+          state_class: measurement
+          device_class: power
+          state: >
+            {{ states('sensor.solarmodbus_device_inverter_l1_power') | float(0) }}
+
+        - name: "Home On-grid Power"
+          unique_id: home_ongrid_power
+          unit_of_measurement: "W"
+          state_class: measurement
+          device_class: power
+          state: >
+            {{ states('sensor.solarmodbus_device_load_l1_power') | float(0) }}
+
+        - name: "Home Total Power"
+          unique_id: home_total_power
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          state: >
+            {{ (states('sensor.solarmodbus_device_load_l1_power') | float(0))
+               + (states('sensor.solarmodbus_device_micro_inverter_power') | float(0)) }}
+
+        - name: "PV Power"
+          unique_id: pv_power
+          unit_of_measurement: "W"
+          device_class: power
+          state_class: measurement
+          state: >
+            {{ (states('sensor.solarmodbus_device_pv1_power') | float(0))
+               + (states('sensor.solarmodbus_device_pv2_power') | float(0)) }}
+
+        - name: "Battery State"
+          state: >
+            {% set raw = states('sensor.battery_power') %}
+            {% if raw in ['unknown', 'unavailable', '', None] %}
+              idle
+            {% else %}
+              {% set p = raw | float %}
+              {% if p > 50 %}
+                charging
+              {% elif p < -50 %}
+                discharging
+              {% else %}
+                idle
+              {% endif %}
+            {% endif %}
+          icon: mdi:battery
+
+        - name: "Battery Power"
+          unique_id: battery_power
+          unit_of_measurement: "W"
+          state_class: measurement
+          device_class: power
+          state: >
+            {{ states('sensor.solarmodbus_device_battery_power') | float(0) }}
+
+        - name: "solarmodbus_device_time_of_use"
+          state: >
+            {% set v = states('sensor.solarmodbus_device_time_of_use_raw') | int %}
+            {% if (v % 2) == 1 %}
+              Enabled
+            {% else %}
+              Disabled
+            {% endif %}
+
+  # ######## AUTOMATION ########
+  automation:
+    - id: "1783706571186"
+      alias: WRITE-ZERO-EXPORT
+      description: ""
+      triggers:
+        - trigger: state
+          entity_id: input_number.write_zero_export_power
+      conditions: []
+      actions:
+        - action: script.modbuswrite
+          data:
+            address: 206
+            value: "{{ trigger.to_state.state | int }}"
+      mode: single
+
+    - id: "1783706611062"
+      alias: WRITE-MAX-SELL
+      description: ""
+      triggers:
+        - trigger: state
+          entity_id: input_number.write_max_sell_power
+      conditions: []
+      actions:
+        - action: script.modbuswrite
+          data:
+            address: 245
+            value: "{{ trigger.to_state.state | int }}"
+      mode: single
+
+    - id: "1783706611063"
+      alias: WRITE-MAX-SOLAR
+      description: ""
+      triggers:
+        - trigger: state
+          entity_id: input_number.write_max_solar_power
+      conditions: []
+      actions:
+        - action: script.modbuswrite
+          data:
+            address: 53
+            value: "{{ trigger.to_state.state | int }}"
+      mode: single
+
+    - id: "1783980128241"
+      alias: Write Day Mask on Change
+      description: ""
+      triggers:
+        - trigger: state
+          entity_id:
+            - input_boolean.day_mon
+            - input_boolean.day_tue
+            - input_boolean.day_wed
+            - input_boolean.day_thu
+            - input_boolean.day_fri
+            - input_boolean.day_sat
+            - input_boolean.day_sun
+      conditions: []
+      actions:
+        - delay: "0.2"
+        - variables:
+            tou: "{{ 1 if is_state('sensor.solarmodbus_device_time_of_use','Enabled') else 0 }}"
+            mon: "{{ 2 if is_state('input_boolean.day_mon','on') else 0 }}"
+            tue: "{{ 4 if is_state('input_boolean.day_tue','on') else 0 }}"
+            wed: "{{ 8 if is_state('input_boolean.day_wed','on') else 0 }}"
+            thu: "{{ 16 if is_state('input_boolean.day_thu','on') else 0 }}"
+            fri: "{{ 32 if is_state('input_boolean.day_fri','on') else 0 }}"
+            sat: "{{ 64 if is_state('input_boolean.day_sat','on') else 0 }}"
+            sun: "{{ 128 if is_state('input_boolean.day_sun','on') else 0 }}"
+            mask: "{{ mon + tue + wed + thu + fri + sat + sun }}"
+            final: "{{ mask + tou }}"
+        - action: script.modbuswrite
+          data:
+            address: 248
+            value: "{{ final }}"
+      mode: single
+
+    - id: "1785000000210"
+      alias: "WRITE-TOU-POWER"
+      mode: single
+      trigger:
+        - platform: state
+          entity_id:
+            - input_number.write_tou1_power
+            - input_number.write_tou2_power
+            - input_number.write_tou3_power
+            - input_number.write_tou4_power
+            - input_number.write_tou5_power
+            - input_number.write_tou6_power
+      action:
+        - variables:
+            slot: "{{ trigger.entity_id.split('_tou')[1].split('_')[0] }}"
+        - service: script.write_tou_value
+          data:
+            slot: "{{ slot }}"
+            kind: "power"
+            value: "{{ trigger.to_state.state }}"
+
+    - id: "1785000000211"
+      alias: "WRITE-TOU-SOC"
+      mode: single
+      trigger:
+        - platform: state
+          entity_id:
+            - input_number.write_tou1_soc
+            - input_number.write_tou2_soc
+            - input_number.write_tou3_soc
+            - input_number.write_tou4_soc
+            - input_number.write_tou5_soc
+            - input_number.write_tou6_soc
+      action:
+        - variables:
+            slot: "{{ trigger.entity_id.split('_tou')[1].split('_')[0] }}"
+        - service: script.write_tou_value
+          data:
+            slot: "{{ slot }}"
+            kind: "soc"
+            value: "{{ trigger.to_state.state }}"
