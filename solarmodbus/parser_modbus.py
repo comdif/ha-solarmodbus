@@ -39,37 +39,30 @@ class ModbusValueParser:
 
         if rule == 1:
             val = values[0]
-
         elif rule == 2:
             val = self._to_signed_16(values[0])
-
         elif rule == 3:
             val = 0
             for v in values:
                 val = (val << 16) | v
-
         elif rule == 4:
             if len(values) < 2:
                 raise ValueError("Rule 4 requires 2 registers")
             val = (values[1] << 16) | values[0]
-
         elif rule == 5:
             chars = []
             for v in values:
                 chars.append((v >> 8) & 0xFF)
                 chars.append(v & 0xFF)
             val = bytes(chars).decode(errors="ignore").strip("\x00").strip()
-
         elif rule == 6:
             mask = item.get("mask", 1)
             val = values[0] & mask
-
         elif rule == 9:
             raw = values[0]
             hours = (raw >> 8) & 0xFF
             minutes = raw & 0xFF
             val = f"{hours:02d}:{minutes:02d}"
-
         else:
             val = values[0]
 
@@ -91,13 +84,11 @@ class ModbusValueParser:
         if item.get("class") == "enum" and "lookup" in item:
             original_val = val
             matched = False
-
             for entry in item["lookup"]:
                 if "key" in entry and entry["key"] == original_val:
                     val = entry["value"]
                     matched = True
                     break
-
             if not matched:
                 for entry in item["lookup"]:
                     if "bit" in entry:
@@ -106,7 +97,6 @@ class ModbusValueParser:
                             val = entry["value"]
                             matched = True
                             break
-
             if not matched:
                 for entry in item["lookup"]:
                     if entry.get("key") == "default":
@@ -118,6 +108,9 @@ class ModbusValueParser:
             val = val * scale
         except Exception:
             _LOGGER.debug("Scale not applicable on %s", item.get("name"))
+
+        if item.get("isstr"):
+            val = str(val)
 
         return val
 
