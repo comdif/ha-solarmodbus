@@ -169,7 +169,7 @@ parameters:
     - name: "Battery Temperature"
       class: "temperature"
       state_class: "measurement"
-      uom: "Â°C"
+      uom: "°C"
       scale: 0.1
       rule: 1
       offset: 1000      
@@ -480,7 +480,7 @@ parameters:
     - name: "DC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "Â°C"
+      uom: "°C"
       scale: 0.1
       rule: 2
       offset: 1000      
@@ -490,7 +490,7 @@ parameters:
     - name: "AC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "Â°C"
+      uom: "°C"
       scale: 0.1
       rule: 2
       offset: 1000      
@@ -573,6 +573,10 @@ parameters:
       lookup:
         - key: 0
           value: "OK"
+        - bit: 2
+          value: "Grid phase failure"
+        - bit: 3
+          value: "Meter communication failure"
         - bit: 6
           value: "DC/DC Soft Start failure"
         - bit: 9
@@ -587,6 +591,12 @@ parameters:
           value: "DC Over-current failure"
         - bit: 22
           value: "AC current leakage failure"
+        - bit: 23
+          value: "ARC fault"
+        - bit: 30
+          value: "Battery loss"
+        - bit: 31
+          value: "Parallel communication quality"
         - bit: 63
           value: "Temperature is too high"
         - key: default
