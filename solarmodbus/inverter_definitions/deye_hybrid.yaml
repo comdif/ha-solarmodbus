@@ -169,7 +169,7 @@ parameters:
     - name: "Battery Temperature"
       class: "temperature"
       state_class: "measurement"
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 1
       offset: 1000      
@@ -480,7 +480,7 @@ parameters:
     - name: "DC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 2
       offset: 1000      
@@ -490,7 +490,7 @@ parameters:
     - name: "AC Temperature"
       class: "temperature"
       state_class: "measurement"      
-      uom: "°C"
+      uom: "Â°C"
       scale: 0.1
       rule: 2
       offset: 1000      
