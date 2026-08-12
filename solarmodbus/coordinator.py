@@ -82,7 +82,7 @@ class SolarmodbusCoordinator(DataUpdateCoordinator):
                 values=[value],
             )
 
-        # MODBUS / SERIAL → version stable, inchangée
+        # MODBUS / SERIAL
         try:
             self._client.close()
         except Exception:
