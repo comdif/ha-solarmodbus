@@ -1,7 +1,189 @@
 solarmodbus_functionality:
 
-  # ######## INPUT NUMBER ########
   input_number:
+
+    ######################### FOR BATTERY SET-1 #########################
+    ###### BASIC
+    write_battery_capacity:
+      name: "Capacity Set"
+      min: 0
+      max: 9999
+      initial: 100
+      step: 5
+      unit_of_measurement: "Ah"
+      mode: box
+
+    write_batt_empty_v:
+      name: "Empty V Set"
+      min: 40.0
+      max: 60.0
+      initial: 40
+      step: 0.01
+      unit_of_measurement: "V"
+      mode: box
+
+    write_batt_resistance:
+      name: "Resistance Set"
+      min: 0
+      max: 200
+      initial: 30
+      step: 1
+      unit_of_measurement: "m\u03A9"
+      mode: box
+
+    write_batt_charge_efficiency:
+      name: "Efficiency Set"
+      min: 0.0
+      max: 100.0
+      initial: 98.0
+      step: 0.1
+      unit_of_measurement: "%"
+      mode: box
+
+    ###### EXTENDED
+    write_equalization_cycle:
+      name: "Equalization Cycle Set"
+      min: 0
+      max: 90
+      initial: 30
+      step: 1
+      unit_of_measurement: "D"
+      mode: box
+
+    write_equalization_operating_time:
+      name: "Equalization Operating Time Set"
+      min: 0
+      max: 20
+      initial: 0
+      step: 1
+      unit_of_measurement: "h/2"
+      mode: box
+
+    write_equalization_v:
+      name: "Equalization V Set"
+      min: 40.0
+      max: 60.0
+      initial: 57.6
+      step: 0.01
+      unit_of_measurement: "V"
+      mode: box
+
+    write_absorption_v:
+      name: "Absorption V Set"
+      min: 40.0
+      max: 60.0
+      initial: 57.6
+      step: 0.01
+      unit_of_measurement: "V"
+      mode: box
+
+    write_float_v:
+      name: "Float V Set"
+      min: 40.0
+      max: 60.0
+      initial: 54.0
+      step: 0.01
+      unit_of_measurement: "V"
+      mode: box
+
+    write_tempco:
+      name: "TEMPCO Set"
+      min: 0
+      max: 20
+      initial: 0
+      step: 1
+      unit_of_measurement: "-mV/\u00B0C/Cell"
+      mode: box
+
+    ######################### FOR BATTERY SET-2 #================#########
+    write_max_a_charge:
+      name: "Max A Charge Set"
+      min: 0
+      max: 300
+      initial: 60
+      step: 1
+      unit_of_measurement: "A"
+      mode: box
+
+    write_max_a_discharge:
+      name: "Max A Discharge Set"
+      min: 0
+      max: 300
+      initial: 100
+      step: 1
+      unit_of_measurement: "A"
+      mode: box
+
+    write_batt_shutdown:
+      name: "Batt Shutdown % Set"
+      min: 0
+      max: 100
+      initial: 10
+      step: 1
+      unit_of_measurement: "%"
+      mode: box
+
+    write_batt_restart:
+      name: "Batt Restart % Set"
+      min: 0
+      max: 100
+      initial: 35
+      step: 1
+      unit_of_measurement: "%"
+      mode: box
+
+    write_batt_low:
+      name: "Batt Low % Set"
+      min: 0
+      max: 100
+      initial: 20
+      step: 1
+      unit_of_measurement: "%"
+      mode: box
+
+
+    ############################ FOR TOU SET ############################
+    write_tou_time_1:
+      name: "T1 End Slider"
+      min: 0
+      max: 1440
+      step: 5
+      unit_of_measurement: "min"
+      mode: slider
+
+    write_tou_time_2:
+      name: "T2 End Slider"
+      min: 0
+      max: 1440
+      step: 5
+      unit_of_measurement: "min"
+      mode: slider
+ 
+    write_tou_time_3:
+      name: "T3 End Slider"
+      min: 0
+      max: 1440
+      step: 5
+      unit_of_measurement: "min"
+      mode: slider
+
+    write_tou_time_4:
+      name: "T4 End Slider"
+      min: 0
+      max: 1440
+      step: 5
+      unit_of_measurement: "min"
+      mode: slider
+
+    write_tou_time_5:
+      name: "T5 End Slider"
+      min: 0
+      max: 1440
+      step: 5
+      unit_of_measurement: "min"
+      mode: slider
+    ############################ FOR TOU SET ############################
+
     write_max_sell_power:
       name: Max Sell Power
       min: 500
@@ -12,7 +194,7 @@ solarmodbus_functionality:
 
     write_zero_export_power:
       name: Zero Export Power
-      min: 20
+      min: 0
       max: 500
       step: 10
       unit_of_measurement: "W"
@@ -116,7 +298,6 @@ solarmodbus_functionality:
       unit_of_measurement: "%"
       mode: slider
 
-  # ######## INPUT BOOLEAN ########
   input_boolean:
     day_mon:
       name: Monday
@@ -133,7 +314,6 @@ solarmodbus_functionality:
     day_sun:
       name: Sunday
 
-  # ########### SCRIPT ###########
   script:
     modbuswrite:
       alias: modbuswrite
@@ -192,8 +372,62 @@ solarmodbus_functionality:
             address: "{{ addr }}"
             value: "{{ new }}"
 
+    restart_solarmodbus:
+      alias: "Restart Solarmodbus Integration"
+      sequence:
+        - service: homeassistant.reload_config_entry
+          data:
+            entry_id: "{{ states('sensor.solarmodbus_entry_id') }}"
 
-  # ########### TEMPLATE ###########
+
+    ############################ FOR TOU SET ############################
+    tou_submit_configuration:
+      alias: "TOU Submit Configuration"
+      sequence:
+        - service: script.modbuswrite
+          data:
+            address: 250
+            value: 0
+        - service: script.modbuswrite
+          data:
+            address: 251
+            value: >-
+              {% set m = states('input_number.write_tou_time_1')|int %}
+              {{ ((m/60)|int * 100) + (m%60) }}
+        - service: script.modbuswrite
+          data:
+            address: 252
+            value: >-
+              {% set m1 = states('input_number.write_tou_time_1')|int %}
+              {% set m2 = states('input_number.write_tou_time_2')|int %}
+              {% set m = m2 if m2 >= m1 + 5 else m1 + 5 %}
+              {{ ((m/60)|int * 100) + (m%60) }}
+        - service: script.modbuswrite
+          data:
+            address: 253
+            value: >-
+              {% set m2 = states('input_number.write_tou_time_2')|int %}
+              {% set m3 = states('input_number.write_tou_time_3')|int %}
+              {% set m = m3 if m3 >= m2 + 5 else m2 + 5 %}
+              {{ ((m/60)|int * 100) + (m%60) }}
+        - service: script.modbuswrite
+          data:
+            address: 254
+            value: >-
+              {% set m3 = states('input_number.write_tou_time_3')|int %}
+              {% set m4 = states('input_number.write_tou_time_4')|int %}
+              {% set m = m4 if m4 >= m3 + 5 else m3 + 5 %}
+              {{ ((m/60)|int * 100) + (m%60) }}
+        - service: script.modbuswrite
+          data:
+            address: 255
+            value: >-
+              {% set m4 = states('input_number.write_tou_time_4')|int %}
+              {% set m5 = states('input_number.write_tou_time_5')|int %}
+              {% set m = m5 if m5 >= m4 + 5 else m4 + 5 %}
+              {{ ((m/60)|int * 100) + (m%60) }}
+    ############################ FOR TOU SET ############################
+
   template:
     - sensor:
         - name: "Home Off-grid Power"
@@ -202,7 +436,7 @@ solarmodbus_functionality:
           state_class: measurement
           device_class: power
           state: >
-            {{ states('sensor.solarmodbus_device_inverter_l1_power') | float(0) }}
+            {{ states('sensor.solarmodbus_device_total_load_power') | float(0) }}
 
         - name: "Home On-grid Power"
           unique_id: home_ongrid_power
@@ -210,7 +444,7 @@ solarmodbus_functionality:
           state_class: measurement
           device_class: power
           state: >
-            {{ states('sensor.solarmodbus_device_load_l1_power') | float(0) }}
+            {{ states('sensor.solarmodbus_device_total_grid_power') | float(0) }}
 
         - name: "Home Total Power"
           unique_id: home_total_power
@@ -218,8 +452,8 @@ solarmodbus_functionality:
           device_class: power
           state_class: measurement
           state: >
-            {{ (states('sensor.solarmodbus_device_load_l1_power') | float(0))
-               + (states('sensor.solarmodbus_device_micro_inverter_power') | float(0)) }}
+            {{ (states('sensor.solarmodbus_device_total_load_power') | float(0))
+               + (states('sensor.solarmodbus_device_total_grid_power') | float(0)) }}
 
         - name: "PV Power"
           unique_id: pv_power
@@ -232,28 +466,20 @@ solarmodbus_functionality:
 
         - name: "Battery State"
           state: >
-            {% set raw = states('sensor.battery_power') %}
+            {% set raw = states('sensor.solarmodbus_device_battery_current') %}
             {% if raw in ['unknown', 'unavailable', '', None] %}
               idle
             {% else %}
-              {% set p = raw | float %}
-              {% if p > 50 %}
+              {% set i = raw | float %}
+              {% if i < -1 %}
                 charging
-              {% elif p < -50 %}
+              {% elif i > 1 %}
                 discharging
               {% else %}
                 idle
               {% endif %}
             {% endif %}
           icon: mdi:battery
-
-        - name: "Battery Power"
-          unique_id: battery_power
-          unit_of_measurement: "W"
-          state_class: measurement
-          device_class: power
-          state: >
-            {{ states('sensor.solarmodbus_device_battery_power') | float(0) }}
 
         - name: "solarmodbus_device_time_of_use"
           state: >
@@ -264,7 +490,39 @@ solarmodbus_functionality:
               Disabled
             {% endif %}
 
-  # ######## AUTOMATION ########
+      ##### UPDATE ID IF WATCHDOG IS NEEDED #######
+        - name: "solarmodbus_entry_id"
+          state: "01KY2JG2J5361BQ3BW3YJX2W2R"
+
+        - name: "solarmodbus_watchdog"
+          state: >
+            {% set last = states.sensor.solarmodbus_device_inverter_l1_power.last_updated %}
+            {% set diff = (now() - last).total_seconds() %}
+            {{ diff > 30 }}
+
+      ############################ FOR TOU SET ############################
+        - name: "solarmodbus_tou_target_text_1"
+          state: >-
+            {% set m = states('input_number.write_tou_time_1') | int(0) %}
+            {{ "%02d:%02d" | format((m / 60) | int, m % 60) }}
+        - name: "solarmodbus_tou_target_text_2"
+          state: >-
+            {% set m = states('input_number.write_tou_time_2') | int(0) %}
+            {{ "%02d:%02d" | format((m / 60) | int, m % 60) }}
+        - name: "solarmodbus_tou_target_text_3"
+          state: >-
+            {% set m = states('input_number.write_tou_time_3') | int(0) %}
+            {{ "%02d:%02d" | format((m / 60) | int, m % 60) }}
+        - name: "solarmodbus_tou_target_text_4"
+          state: >-
+            {% set m = states('input_number.write_tou_time_4') | int(0) %}
+            {{ "%02d:%02d" | format((m / 60) | int, m % 60) }}
+        - name: "solarmodbus_tou_target_text_5"
+          state: >-
+            {% set m = states('input_number.write_tou_time_5') | int(0) %}
+            {{ "%02d:%02d" | format((m / 60) | int, m % 60) }}
+      ############################ FOR TOU SET ############################
+
   automation:
     - id: "1783706571186"
       alias: WRITE-ZERO-EXPORT
@@ -382,3 +640,94 @@ solarmodbus_functionality:
             slot: "{{ slot }}"
             kind: "soc"
             value: "{{ trigger.to_state.state }}"
+
+    - id: "9999999999999"
+      alias: "Solarmodbus Watchdog Restart"
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: sensor.solarmodbus_watchdog
+          to: "True"
+          for: "00:00:15"
+      action:
+        - service: script.restart_solarmodbus
+
+    ############################ FOR TOU SET ############################
+    - id: "1000000000123"
+      alias: "TOU Interconnected Sliders Watchdog"
+      mode: restart
+      trigger:
+        - platform: state
+          entity_id:
+            - input_number.write_tou_time_1
+            - input_number.write_tou_time_2
+            - input_number.write_tou_time_3
+            - input_number.write_tou_time_4
+            - input_number.write_tou_time_5
+      condition:
+        - condition: template
+          value_template: "{{ trigger.to_state.context.user_id is not none }}"
+      action:
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_2
+            value: "{{ [states('input_number.write_tou_time_2')|int, states('input_number.write_tou_time_1')|int]|max }}"
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_3
+            value: "{{ [states('input_number.write_tou_time_3')|int, states('input_number.write_tou_time_2')|int]|max }}"
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_4
+            value: "{{ [states('input_number.write_tou_time_4')|int, states('input_number.write_tou_time_3')|int]|max }}"
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_5
+            value: "{{ [states('input_number.write_tou_time_5')|int, states('input_number.write_tou_time_4')|int]|max }}"
+
+    - id: "1000000000124"
+      alias: "TOU Sync Sensors to Sliders"
+      mode: restart
+      trigger:
+        - platform: homeassistant
+          event: start
+        - platform: state
+          entity_id:
+            - sensor.solarmodbus_device_time_of_use_time_2
+            - sensor.solarmodbus_device_time_of_use_time_3
+            - sensor.solarmodbus_device_time_of_use_time_4
+            - sensor.solarmodbus_device_time_of_use_time_5
+            - sensor.solarmodbus_device_time_of_use_time_6
+      action:
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_1
+            value: >-
+              {% set t = states('sensor.solarmodbus_device_time_of_use_time_2').split(':') %}
+              {{ (t[0]|int * 60) + t[1]|int }}
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_2
+            value: >-
+              {% set t = states('sensor.solarmodbus_device_time_of_use_time_3').split(':') %}
+              {{ (t[0]|int * 60) + t[1]|int }}
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_3
+            value: >-
+              {% set t = states('sensor.solarmodbus_device_time_of_use_time_4').split(':') %}
+              {{ (t[0]|int * 60) + t[1]|int }}
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_4
+            value: >-
+              {% set t = states('sensor.solarmodbus_device_time_of_use_time_5').split(':') %}
+              {{ (t[0]|int * 60) + t[1]|int }}
+        - service: input_number.set_value
+          data:
+            entity_id: input_number.write_tou_time_5
+            value: >-
+              {% set t = states('sensor.solarmodbus_device_time_of_use_time_6').split(':') %}
+              {{ (t[0]|int * 60) + t[1]|int }}
+
+    ############################ FOR TOU SET ############################
