@@ -205,10 +205,60 @@ parameters:
     # Battery Settings-2
     # ============================================================
 
+    - name: "Max A Charge"
+      scale: 1
+      rule: 1
+      uom: "A"
+      registers: [0x00D2]
+      icon: 'mdi:battery-arrow-up-bold'
+
+    - name: "Max A Discharge"
+      scale: 1
+      rule: 1
+      uom: "A"
+      registers: [0x00D3]
+      icon: 'mdi:battery-arrow-down-bold'
+
+    - name: "Batt Shutdown %"
+      scale: 1
+      rule: 1
+      uom: "%"
+      registers: [0x00D9]
+      icon: 'mdi:battery-alert-variant-outline'
+
+    - name: "Batt Restart %"
+      scale: 1
+      rule: 1
+      uom: "%"
+      registers: [0x00DA]
+      icon: 'mdi:battery-refresh'
+
+    - name: "Batt Low %"
+      scale: 1
+      rule: 1
+      uom: "%"
+      registers: [0x00DB]
+      icon: 'mdi:battery-low'
+
+    - name: "Activate Battery"
+      scale: 1
+      rule: 1
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      registers: [0x00D6]
+      icon: 'mdi:power-toggle'
+
+    - name: "Lithium Mode"
+      scale: 1
+      rule: 1
+      registers: [0x0145]
+      icon: 'mdi:developer-board'
+
     - name: "Disable Float Charge"
-      class: ""
-      state_class: ""
-      uom: ""
       scale: 1
       rule: 1
       registers: [0x0146]
@@ -261,6 +311,19 @@ parameters:
       -  key: 16384
          value: "Disable"
       icon: 'mdi:battery'
+
+    # ============================================================
+    # Battery Settings-RAW
+    # ============================================================
+
+    - name: "reg326"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 0
+      registers: [0x0146]
+      isstr: false
 
     # ============================================================
     # Battery Sensors
