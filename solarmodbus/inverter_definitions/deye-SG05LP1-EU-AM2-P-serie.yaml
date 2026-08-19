@@ -89,11 +89,183 @@ parameters:
       uom: "W"
       scale: 1
       rule: 1
-      registers: [0x00A6]
+      registers: [0x00A5]
       icon: 'mdi:solar-power'
 
  - group: Battery
-   items: 
+   items:
+    # ============================================================
+    # Battery Settings-1
+    # ============================================================
+
+    - name: "Batt Type"
+      scale: 1
+      rule: 3
+      registers: [0x00C8, 0x00D5]
+      isstr: true
+      lookup:
+      -  key: 65537
+         value: "BMS Lithium Batt"
+      -  key: 1
+         value: "Batt-% Mode"
+      -  key: 0
+         value: "Batt-V Mode"
+      -  key: 2
+         value: "No Battery"
+      -  key: 3
+         value: "Solar Supply Only"
+      icon: 'mdi:battery-settings'
+
+    - name: "Batt Resistance"
+      scale: 1
+      rule: 1
+      uom: "m\u03A9"
+      registers: [0x00D7]
+      icon: 'mdi:resistor'
+
+    - name: "Batt Charge Efficiency"
+      scale: 0.1
+      rule: 1
+      uom: "%"
+      registers: [0x00D8]
+      icon: 'mdi:battery-heart-variant'
+
+    - name: "Battery Capacity"
+      scale: 1
+      rule: 1
+      uom: "Ah"
+      registers: [0x00CC]
+      icon: 'mdi:battery-import'
+
+    - name: "Batt Empty V"
+      scale: 0.01
+      rule: 1
+      uom: "V"
+      registers: [0x00CD]
+      icon: 'mdi:battery-outline'
+
+    - name: "Float V"
+      scale: 0.01
+      rule: 1
+      uom: "V"
+      registers: [0x00CB]
+      icon: 'mdi:battery-charging-wireless'
+
+    - name: "Absorption V"
+      scale: 0.01
+      rule: 1
+      uom: "V"
+      registers: [0x00CA]
+      icon: 'mdi:battery-charging-high'
+
+    - name: "Equalization V"
+      scale: 0.01
+      rule: 1
+      uom: "V"
+      registers: [0x00C9]
+      icon: 'mdi:battery-charging-100'
+
+    - name: "Equalization Cycle"
+      scale: 1
+      rule: 1
+      uom: "D"
+      registers: [0x00CF]
+      icon: 'mdi:calendar-refresh'
+
+    - name: "Equalization Operating Time"
+      scale: 0.5
+      rule: 1
+      uom: "h"
+      registers: [0x00D0]
+      icon: 'mdi:clock-outline'
+
+    - name: "TEMPCO"
+      scale: 1
+      rule: 1
+      uom: "-mV/\u00B0C/Cell"
+      registers: [0x00D1]
+      icon: 'mdi:thermometer-lines'
+
+    - name: "Grid Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00E8]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: 'mdi:battery'
+
+    # ============================================================
+    # Battery Settings-2
+    # ============================================================
+
+    - name: "Disable Float Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0146]
+      isstr: true
+      lookup:
+      -  key: 16384
+         value: "Enable"
+      -  key: 24576
+         value: "Enable"
+      -  key: 0
+         value: "Disable"
+      -  key: 8192
+         value: "Disable"
+      icon: 'mdi:battery'
+
+    # ============================================================
+    # Battery Settings-3
+    # ============================================================
+
+    - name: "Gen Charge"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x00E7]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "Disable"
+      -  key: 1
+         value: "Enable"
+      icon: 'mdi:battery'
+
+    - name: "Gen Force"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0146]
+      isstr: true
+      lookup:
+      -  key: 8192
+         value: "Enable"
+      -  key: 24576
+         value: "Enable"
+      -  key: 0
+         value: "Disable"
+      -  key: 16384
+         value: "Disable"
+      icon: 'mdi:battery'
+
+    # ============================================================
+    # Battery Sensors
+    # ============================================================
+
     - name: "Total Battery Charge"
       class: "energy"
       state_class: "total_increasing"      
@@ -175,21 +347,6 @@ parameters:
       offset: 1000      
       registers: [0x00B6]
       icon: 'mdi:battery'
-
-    - name: "Grid Charge"
-      class: ""
-      state_class: ""
-      uom: ""
-      scale: 1
-      rule: 1
-      registers: [0x00E8]
-      isstr: true
-      lookup:
-      -  key: 0
-         value: "Disable"
-      -  key: 1
-         value: "Enable"
-      icon: "mdi:transmission-tower"
 
  - group: Grid
    items: 
@@ -564,15 +721,17 @@ parameters:
    items: 
     - name: "Alert"
       class: "enum"
-      state_class: ""
-      uom: ""
       scale: 1
-      rule: 3
+      rule: 4
       registers: [0x0067, 0x0068, 0x0069, 0x006A]
       icon: "mdi:message-alert-outline"
       lookup:
         - key: 0
           value: "OK"
+        - bit: 2
+          value: "Grid phase failure"
+        - bit: 3
+          value: "Meter communication failure"
         - bit: 6
           value: "DC/DC Soft Start failure"
         - bit: 9
@@ -587,6 +746,12 @@ parameters:
           value: "DC Over-current failure"
         - bit: 22
           value: "AC current leakage failure"
+        - bit: 23
+          value: "ARC fault"
+        - bit: 30
+          value: "Battery loss"
+        - bit: 31
+          value: "Parallel communication quality"
         - bit: 63
           value: "Temperature is too high"
         - key: default
