@@ -82,3 +82,13 @@ class SolarmodbusSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         return self.coordinator.data.get(self.yaml["name"])
+
+    @property
+    def suggested_display_precision(self) -> int | None:
+        """Force the UI precision based on the YAML scale factor."""
+        scale = self.yaml.get("scale")
+        if scale == 0.01:
+            return 2
+        elif scale == 0.1:
+            return 1
+        return None
